@@ -1,6 +1,7 @@
 import praw
 import requests
 import os
+import time
 
 r = praw.Reddit(user_agent="Wallpaper switcher V0.1 by /u/Pusillus")
 
@@ -27,13 +28,13 @@ image_n = 0
 total_images = len(image_urls)
 
 for url in image_urls:
-    print("Downloading image" + str(image_n+1) + "/" + str(total_images))
+    print("Downloading image " + str(image_n+1) + "/" + str(total_images))
     # Send request
     response = requests.get(url)
 
     # Save image to disk
     if response.status_code == 200:
-        file_path = os.path.join('images', str(image_n) + ".jpg")
+        file_path = os.path.join('images', str(image_n) + time.strftime(" %d-%m-%Y-%H:%M") +  ".jpg")
         f = open(file_path, 'wb')
         for chunk in response.iter_content(10000):
             f.write(chunk)
