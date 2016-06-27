@@ -3,40 +3,12 @@ import requests
 import os
 import time
 
-r = praw.Reddit(user_agent="Wallpaper switcher V0.1 by /u/Pusillus")
+import download_functions as dl
 
-
-# Get image link of most upvoted wallpaper of the day
-def get_top_image(subreddit):
-    dl_urls = []
-    for submission in subreddit.get_top(limit=25):
-        url = submission.url
-        if url.endswith(".jpg") or url.endswith(".png"):
-            dl_urls.append(url)
-        # Imgur support
-        elif ("imgur.com" in url) and ("/a/" not in url):
-            if url.endswith("/new"):
-                url = url.rsplit("/", 1)[0]
-            id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-            dl_urls.append("http://imgur.com/" + id + ".jpg")
-    return dl_urls
+r = praw.Reddit(user_agent="Wallpaper switcher V0.1.1 by /u/Pusillus")
 
 print("Fetching urls...")
 # Get Urls
-image_urls = get_top_image(r.get_subreddit("wallpapers"))
-image_n = 0
-total_images = len(image_urls)
+image_urls = dl.get_top_image(r.get_subreddit("wallpapers"))
 
-for url in image_urls:
-    print("Downloading image " + str(image_n+1) + "/" + str(total_images))
-    # Send request
-    response = requests.get(url)
-
-    # Save image to disk
-    if response.status_code == 200:
-        file_path = os.path.join('images', str(image_n) + time.strftime(" %d-%m-%Y-%H:%M") +  ".jpg")
-        f = open(file_path, 'wb')
-        for chunk in response.iter_content(10000):
-            f.write(chunk)
-        f.close()
-    image_n += 1
+dl.download_images(image_urls)
