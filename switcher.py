@@ -15,7 +15,7 @@ image_urls = dl.get_top_image(r.get_subreddit("wallpapers"))
 # TODO: Use better way to store downloaded links
 image_urls = dl.check_links(image_urls)
 
-# Write links to file
+# Write new links to file
 dl.write_links(image_urls)
 
 # Downloda images

@@ -35,7 +35,8 @@ def download_images(image_urls):
 
         # Save image to disk
         if response.status_code == 200:
-            file_path = os.path.join('images', str(image_n) + time.strftime(" %d-%m-%Y") + ".jpg")
+            file_path = os.path.join('images', str(image_n) +
+                                     time.strftime(" %d-%m-%Y") + ".jpg")
             with open(file_path, 'wb') as fo:
                 for chunk in response.iter_content(4096):
                     fo.write(chunk)
@@ -54,15 +55,14 @@ def write_links(image_links):
 # Check links
 def check_links(image_links):
     try:
-        image_links = image_links
         new_links = []
-        old_links = open('links-downloaded.txt').readlines()
-        old_links_modulated = []
-        for link in old_links:
-            old_links_modulated.append(link[:-1])
+        old_links = []
+
+        for link in open('links-downloaded.txt').readlines():
+            old_links.append(link[:-1])
 
         for link in image_links:
-            if link not in old_links_modulated:
+            if link not in old_links:
                 new_links.append(link)
             else:
                 print(link + " Has already been downloaded.")
