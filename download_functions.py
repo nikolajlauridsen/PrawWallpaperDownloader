@@ -39,4 +39,35 @@ def download_images(image_urls):
             with open(file_path, 'wb') as fo:
                 for chunk in response.iter_content(4096):
                     fo.write(chunk)
+                fo.close()
         image_n += 1
+
+
+# Write image links to file_path
+def write_links(image_links):
+    f = open('links-downloaded.txt', 'a')
+    for link in image_links:
+        f.write(link + "\n")
+    f.close()
+
+
+# Check links
+def check_links(image_links):
+    try:
+        image_links = image_links
+        new_links = []
+        old_links = open('links-downloaded.txt').readlines()
+        old_links_modulated = []
+        for link in old_links:
+            old_links_modulated.append(link[:-1])
+
+        for link in image_links:
+            if link not in old_links_modulated:
+                new_links.append(link)
+            else:
+                print(link + " Has already been downloaded.")
+        return new_links
+
+    except FileNotFoundError:
+        print("No old links")
+        return image_links
