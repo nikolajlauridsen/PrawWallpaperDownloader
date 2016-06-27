@@ -8,7 +8,7 @@ r = praw.Reddit(user_agent="Wallpaper switcher V0.1 by /u/Pusillus")
 # Get image link of most upvoted wallpaper of the day
 def get_top_image(subreddit):
     dl_urls = []
-    for submission in subreddit.get_top(limit=6):
+    for submission in subreddit.get_top(limit=25):
         url = submission.url
         if url.endswith(".jpg") or url.endswith(".png"):
             dl_urls.append(url)
@@ -20,11 +20,14 @@ def get_top_image(subreddit):
             dl_urls.append("http://imgur.com/" + id + ".jpg")
     return dl_urls
 
-# Get Url
+print("Fetching urls...")
+# Get Urls
 image_urls = get_top_image(r.get_subreddit("wallpapers"))
 image_n = 0
+total_images = len(image_urls)
 
 for url in image_urls:
+    print("Downloading image" + str(image_n+1) + "/" + str(total_images))
     # Send request
     response = requests.get(url)
 
