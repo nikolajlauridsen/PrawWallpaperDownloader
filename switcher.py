@@ -8,21 +8,18 @@ r = praw.Reddit(user_agent="Wallpaper switcher V0.1 by /u/Pusillus")
 # Get image link of most upvoted wallpaper of the day
 def get_top_image(subreddit):
     dl_urls = []
-    for submission in subreddit.get_top(limit=10):
+    for submission in subreddit.get_top(limit=6):
         url = submission.url
-        if url.endswith(".jpg"):
+        if url.endswith(".jpg") or url.endswith(".png"):
             dl_urls.append(url)
-
-    return dl_urls
-
-    """
         # Imgur support
-         if ("imgur.com" in url) and ("/a/" not in url):
+        elif ("imgur.com" in url) and ("/a/" not in url):
             if url.endswith("/new"):
                 url = url.rsplit("/", 1)[0]
             id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-            return "http://imgur.com/" + id + ".jpg"
-   """
+            dl_urls.append("http://imgur.com/" + id + ".jpg")
+    return dl_urls
+
 # Get Url
 image_urls = get_top_image(r.get_subreddit("wallpapers"))
 image_n = 0
