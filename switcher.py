@@ -1,7 +1,4 @@
 import praw
-import requests
-import os
-import time
 
 import download_functions as dl
 
