@@ -23,7 +23,7 @@ def get_top_image(subreddit):
 
 
 # Save a list of image links to disk
-def download_images(image_urls):
+def download_images(image_urls, path_modifier):
     images = image_urls
     image_n = 0
     total_images = len(images)
@@ -35,8 +35,8 @@ def download_images(image_urls):
 
         # Save image to disk
         if response.status_code == 200:
-            file_path = os.path.join('images', str(image_n) +
-                                     time.strftime(" %d-%m-%Y") + ".jpg")
+            file_path = os.path.join('images', time.strftime(" %d-%m-%Y") + " " +
+                                     path_modifier + " " + str(image_n) + ".jpg")
             with open(file_path, 'wb') as fo:
                 for chunk in response.iter_content(4096):
                     fo.write(chunk)
