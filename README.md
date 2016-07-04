@@ -7,5 +7,6 @@ Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/
 ### Requirements
 * praw
 * requests
+* sqlite3
 * os
 * time
