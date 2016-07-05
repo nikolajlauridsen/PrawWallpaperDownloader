@@ -14,11 +14,11 @@ image_urls = dl.get_top_image(r.get_subreddit("wallpapers"))
 image_urls = db.check_links(image_urls)
 
 # Write links to database
-for link in image_urls:
-    db.insert_link(link)
+for sumbission in image_urls:
+    db.insert_link(sumbission)
 
 # Download images
-dl.download_images(image_urls, "wallpapers")
+dl.download_images(image_urls)
 
 # Save changes to Database
 db.save_changes()
