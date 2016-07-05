@@ -2,7 +2,6 @@
 Class that handles database interaction
 """
 import sqlite3 as lite
-import time
 
 
 class Db_handler():
@@ -15,7 +14,10 @@ class Db_handler():
 
     # Insert a link into the database
     def insert_link(self, submission):
-        self.c.execute("INSERT INTO downloads VALUES (?,?,?)", (submission["date"], submission["url"], submission["title"]))
+        self.c.execute("INSERT INTO downloads VALUES (?,?,?)",
+                       (submission["date"],
+                        submission["url"],
+                        submission["title"]))
 
     # Returns all links as a list
     def get_links(self):
@@ -24,6 +26,7 @@ class Db_handler():
         return links
 
     # Removes all downloaded links from a list of links
+    # TODO: Use list comprehension
     def check_links(self, submissions):
         new_links = []
         old_links = []

@@ -3,7 +3,7 @@ import praw
 import download_functions as dl
 from db_handler import Db_handler
 
-r = praw.Reddit(user_agent="Wallpaper switcher V0.1.1 by /u/Pusillus")
+r = praw.Reddit(user_agent="Wallpaper switcher V0.2.0 by /u/Pusillus")
 db = Db_handler()
 
 print("Fetching urls...")

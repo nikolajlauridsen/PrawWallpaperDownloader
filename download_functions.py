@@ -4,6 +4,7 @@ Functions related to downloading wallpapers
 import requests
 import time
 import os
+import re
 
 
 # Get image link of most upvoted wallpaper of the day
@@ -12,7 +13,9 @@ def get_top_image(subreddit):
     for submission in subreddit.get_top(limit=25):
         url = submission.url
         if url.endswith(".jpg"):
-            context = {"url": url, "title": submission.title, "date": time.strftime("%d-%m-%Y %H:%M")}
+            context = {"url": url,
+                       "title": submission.title,
+                       "date": time.strftime("%d-%m-%Y %H:%M")}
             dl_urls.append(context)
         # Imgur support
         elif ("imgur.com" in url) and ("/a/" not in url):
@@ -20,7 +23,9 @@ def get_top_image(subreddit):
                 url = url.rsplit("/", 1)[0]
             id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
             link = "http://imgur.com/" + id + ".jpg"
-            context = {"url": link, "title": submission.title, "date": time.strftime("%d-%m-%Y %H:%M")}
+            context = {"url": link,
+                       "title": submission.title,
+                       "date": time.strftime("%d-%m-%Y %H:%M")}
             dl_urls.append(context)
     return dl_urls
 
@@ -37,8 +42,11 @@ def download_images(submissions):
 
         # Save image to disk
         if response.status_code == 200:
-            # TODO: Sanitize post title and mkdir
-            file_path = os.path.join('images', submission["title"] + ".jpg")
+            # Sanitise file name TODO: mkdir)
+            file_path = os.path.join('images',
+                                     re.sub(r'[\:/?"<>|()-=]',
+                                            '', submission["title"]) +
+                                     ".jpg")
             with open(file_path, 'wb') as fo:
                 for chunk in response.iter_content(4096):
                     fo.write(chunk)
