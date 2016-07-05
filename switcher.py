@@ -8,17 +8,17 @@ db = Db_handler()
 
 print("Fetching urls...")
 # Get image urls
-image_urls = dl.get_top_image(r.get_subreddit("wallpapers"))
+submissions = dl.get_top_image(r.get_subreddit("wallpapers"))
 
 # Check if links has been downloaded
-image_urls = db.check_links(image_urls)
+submissions = db.check_links(submissions)
 
 # Write links to database
-for sumbission in image_urls:
+for sumbission in submissions:
     db.insert_link(sumbission)
 
 # Download images
-dl.download_images(image_urls)
+dl.download_images(submissions)
 
 # Save changes to Database
 db.save_changes()
