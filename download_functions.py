@@ -35,6 +35,7 @@ def download_images(submissions):
     image_n = 0
     total_images = len(submissions)
 
+    os.makedirs('wallpapers', exist_ok=True)
     for submission in submissions:
         print("Downloading image " + str(image_n+1) + "/" + str(total_images))
         # Send request
@@ -43,7 +44,7 @@ def download_images(submissions):
         # Save image to disk
         if response.status_code == 200:
             # Sanitise file name TODO: mkdir)
-            file_path = os.path.join('images',
+            file_path = os.path.join('wallpapers',
                                      re.sub(r'[\:/?"<>|()-=]',
                                             '', submission["title"]) +
                                      ".jpg")

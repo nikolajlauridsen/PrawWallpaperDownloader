@@ -38,7 +38,10 @@ class Db_handler():
             if submission["url"] not in old_links:
                 new_links.append(submission)
             else:
-                print(submission["title"] + " has already been downloaded")
+                try:
+                    print(submission["title"] + " has already been downloaded")
+                except UnicodeEncodeError:
+                    print(submission["url"] + " has already been downloaded")
         return new_links
 
     # Commit changes to the database
