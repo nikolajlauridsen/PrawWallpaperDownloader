@@ -8,5 +8,6 @@ Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/
 * praw
 * requests
 * sqlite3
+* re
 * os
 * time
