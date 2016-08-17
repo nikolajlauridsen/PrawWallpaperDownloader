@@ -19,6 +19,19 @@ class Db_handler():
                         submission["url"],
                         submission["title"]))
 
+    # Return all posts downloaded as a dict
+    def get_posts(self):
+        self.c.execute("SELECT * FROM downloads")
+        entries = self.c.fetchall()
+        posts = []
+
+        for entry in entries:
+            context = {"date": entry[0],
+                       "url": entry[1],
+                       "title": entry[2]}
+            posts.append(context)
+        return posts
+
     # Returns all links as a list
     def get_links(self):
         self.c.execute("SELECT Link FROM downloads")

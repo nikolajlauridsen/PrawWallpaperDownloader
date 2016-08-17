@@ -10,7 +10,7 @@ import re
 # Get image link of most upvoted wallpaper of the day
 def get_top_image(subreddit):
     dl_urls = []
-    for submission in subreddit.get_top(limit=25):
+    for submission in subreddit.get_top(limit=100):
         url = submission.url
         if url.endswith(".jpg"):
             context = {"url": url,
@@ -46,7 +46,7 @@ def download_images(submissions):
             # Sanitise file name TODO: mkdir)
             file_path = os.path.join('wallpapers',
                                      re.sub(r'[\:/?"<>|()-=]',
-                                            '', submission["title"]) +
+                                            '', submission["title"][:25]) +
                                      ".jpg")
             with open(file_path, 'wb') as fo:
                 for chunk in response.iter_content(4096):
