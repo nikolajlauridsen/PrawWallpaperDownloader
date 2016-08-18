@@ -32,12 +32,12 @@ def get_top_image(subreddit):
 
 # Save a list of image links to disk
 def download_images(submissions):
-    image_n = 0
+    image_n = 1
     total_images = len(submissions)
 
     os.makedirs('wallpapers', exist_ok=True)
     for submission in submissions:
-        print("Downloading image " + str(image_n+1) + "/" + str(total_images))
+        print('\r Downloading image {}/{}'.format(image_n, total_images), flush=True, end='')
         # Send request
         response = requests.get(submission["url"])
 
