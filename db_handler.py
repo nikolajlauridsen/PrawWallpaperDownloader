@@ -43,6 +43,7 @@ class Db_handler():
     def check_links(self, submissions):
         new_links = []
         old_links = []
+        skipped_list = []
 
         for link in self.get_links():
             old_links.append(link[0])
@@ -55,7 +56,8 @@ class Db_handler():
                     print(submission["title"] + " has already been downloaded")
                 except UnicodeEncodeError:
                     print(submission["url"] + " has already been downloaded")
-        return new_links
+                skipped_list.append(submission)
+        return new_links, skipped_list
 
     # Commit changes to the database
     def save_changes(self):
