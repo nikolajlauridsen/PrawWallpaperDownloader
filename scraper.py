@@ -21,7 +21,8 @@ class Scraper:
         self.subreddit = sub
 
     def get_posts(self, subreddit):
-        for submission in subreddit.get_top(limit=100):
+        # TODO: Rubber ducky this shit, figure it out, something is not right
+        for submission in subreddit.get_hot(limit=100):
             url = submission.url
             if url.endswith(".jpg"):
                 context = {"url": url,
@@ -33,7 +34,7 @@ class Scraper:
                 if url.endswith("/new"):
                     url = url.rsplit("/", 1)[0]
                 id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-                link = "http://imgur.com/" + id + ".jpg"
+                link = "http://i.imgur.com/" + id + ".jpg"
                 context = {"url": link,
                            "title": submission.title,
                            "date": time.strftime("%d-%m-%Y %H:%M")}

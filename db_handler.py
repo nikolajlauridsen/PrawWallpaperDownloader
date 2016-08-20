@@ -19,7 +19,7 @@ class Db_handler():
                         submission["url"],
                         submission["title"]))
 
-    # Return all posts downloaded as a dict
+    # Return all posts downloaded as a list of dictionaries
     def get_posts(self):
         self.c.execute("SELECT * FROM downloads")
         entries = self.c.fetchall()
