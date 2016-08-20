@@ -21,7 +21,6 @@ class Scraper:
         self.subreddit = sub
 
     def get_posts(self, subreddit):
-        # TODO: Rubber ducky this shit, figure it out, something is not right
         for submission in subreddit.get_hot(limit=100):
             url = submission.url
             if url.endswith(".jpg"):
