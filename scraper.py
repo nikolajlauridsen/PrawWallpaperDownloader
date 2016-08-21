@@ -8,7 +8,7 @@ import praw
 
 class Scraper:
 
-    def __init__(self, sub="wallpapers"):
+    def __init__(self, args):
         self.db = Db_handler()
         self.r = praw.Reddit(user_agent="Wallpaper switcher V0.2.1 by /u/Pusillus")
         self.succeeded = 0
@@ -18,7 +18,7 @@ class Scraper:
         self.posts = []
         self.failed_list = []
         self.skipped_list = []
-        self.subreddit = sub
+        self.subreddit = args.subreddit
 
     def get_posts(self, subreddit):
         for submission in subreddit.get_hot(limit=100):
