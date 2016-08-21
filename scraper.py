@@ -18,10 +18,10 @@ class Scraper:
         self.posts = []
         self.failed_list = []
         self.skipped_list = []
-        self.subreddit = args.subreddit
+        self.args = args
 
     def get_posts(self, subreddit):
-        for submission in subreddit.get_hot(limit=100):
+        for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
             if url.endswith(".jpg"):
                 context = {"url": url,
@@ -81,7 +81,7 @@ class Scraper:
 
     def run(self):
         print('Fetching URLS...')
-        self.get_posts(self.r.get_subreddit(self.subreddit))
+        self.get_posts(self.r.get_subreddit(self.args.subreddit))
         self.download_images()
         self.save_posts()
         self.print_stats()
