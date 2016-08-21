@@ -8,7 +8,7 @@ import praw
 
 class Scraper:
 
-    def __init__(self, sub):
+    def __init__(self, sub="wallpapers"):
         self.db = Db_handler()
         self.r = praw.Reddit(user_agent="Wallpaper switcher V0.2.1 by /u/Pusillus")
         self.succeeded = 0
