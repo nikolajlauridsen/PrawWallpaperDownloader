@@ -68,13 +68,16 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(submission)
 
+    # Print posts in skipped_list to console
     def print_skipped(self):
         if self.args.verbose:
+            print("="*10 + "skipped posts" + "="*10)
             for post in self.skipped_list:
                 try:
-                    print(post["title"] + " has already been downloaded")
+                    print(post["title"] + " has already been downloaded, skipping")
                 except UnicodeEncodeError:
-                    print(post["url"] + " has already been downloaded")
+                    print(post["url"] + " has already been downloaded, skipping")
+            print("="*10 + "end" + "="*10)
 
     # Print download stats to console
     def print_stats(self):
