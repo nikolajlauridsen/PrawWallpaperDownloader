@@ -14,7 +14,7 @@ class Scraper:
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
-        self.total_posts = 0
+        self.n_posts = 0
         self.posts = []
         self.failed_list = []
         self.skipped_list = []
@@ -41,14 +41,13 @@ class Scraper:
 
     def download_images(self):
         download_n = 1
-        self.total_posts = len(self.posts)
+        self.n_posts = len(self.posts)
         self.posts, self.skipped_list = self.db.check_links(self.posts)
-        total_downloads = len(self.posts)
 
         os.makedirs('wallpapers', exist_ok=True)
         for submission in self.posts:
             print('\r Downloading image {}/{}'
-                  .format(download_n, total_downloads), flush=True, end='')
+                  .format(download_n, self.n_posts), flush=True, end='')
             # Send requests
             response = requests.get(submission["url"])
 
@@ -72,7 +71,7 @@ class Scraper:
         print("\n")
         self.skipped = len(self.skipped_list)
         print('Posts downloaded: {}/{} \nSkipped: {}\nFailed: {}'
-              .format(self.succeeded, self.total_posts, self.skipped, self.failed))
+              .format(self.succeeded, self.n_posts, self.skipped, self.failed))
 
     def save_posts(self):
         for post in self.posts:
@@ -83,16 +82,19 @@ class Scraper:
         with open("log.txt", 'w') as fo:
             fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
             fo.write("Succeeded: {}\nSkipped: {}\nFailed: {}\n\n".format(self.succeeded, self.skipped, self.failed))
+
             if len(self.skipped_list) > 0:
                 fo.write("="*5 + "Begin skipped list" + "="*5 + "\n ")
                 for post in self.skipped_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
                 fo.write("=" * 5 + "End skipped list" + "=" * 5 + "\n")
+
             if len(self.failed_list) > 0:
                 fo.write("="*5 + "Begin failed list" + "="*5 + "\n")
                 for post in self.failed_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
                 fo.write("=" * 5 + "End failed list" + "=" * 5 + "\n")
+
             fo.close()
 
     def run(self):
@@ -103,5 +105,3 @@ class Scraper:
         self.print_stats()
         if self.args.log:
             self.save_log()
-
-
