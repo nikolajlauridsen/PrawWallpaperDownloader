@@ -39,7 +39,6 @@ class Db_handler():
         return links
 
     # Removes all downloaded links from a list of links
-    # TODO: Use list comprehension
     def check_links(self, submissions):
         new_links = []
         old_links = []

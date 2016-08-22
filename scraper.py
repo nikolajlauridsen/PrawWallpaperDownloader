@@ -20,6 +20,7 @@ class Scraper:
         self.skipped_list = []
         self.args = args
 
+    # get posts from reddit and add them to self.posts
     def get_posts(self, subreddit):
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
@@ -39,6 +40,7 @@ class Scraper:
                            "date": time.strftime("%d-%m-%Y %H:%M")}
                 self.posts.append(context)
 
+    # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
         download_n = 1
         self.n_posts = len(self.posts)
@@ -67,17 +69,20 @@ class Scraper:
                 self.failed_list.append(submission)
             download_n += 1
 
+    # Print download stats to console
     def print_stats(self):
         print("\n")
         self.skipped = len(self.skipped_list)
         print('Posts downloaded: {}/{} \nSkipped: {}\nFailed: {}'
               .format(self.succeeded, self.n_posts, self.skipped, self.failed))
 
+    # Save posts currently in self.posts to database
     def save_posts(self):
         for post in self.posts:
             self.db.insert_link(post)
         self.db.save_changes()
 
+    # Save logs to file
     def save_log(self):
         with open("log.txt", 'w') as fo:
             fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
@@ -97,8 +102,9 @@ class Scraper:
 
             fo.close()
 
+    # Run the scraper
     def run(self):
-        print('Fetching URLS...')
+        print('Contacting reddit and fetching urls, please hold...')
         self.get_posts(self.r.get_subreddit(self.args.subreddit))
         self.download_images()
         self.save_posts()
