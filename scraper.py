@@ -42,6 +42,7 @@ class Scraper:
                 self.posts.append(context)
         self.n_posts = len(self.posts)
         self.posts, self.skipped_list = self.db.check_links(self.posts)
+        self.print_skipped()
 
     # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
@@ -66,6 +67,14 @@ class Scraper:
             else:
                 self.failed += 1
                 self.failed_list.append(submission)
+
+    def print_skipped(self):
+        if self.args.verbose:
+            for post in self.skipped_list:
+                try:
+                    print(post["title"] + " has already been downloaded")
+                except UnicodeEncodeError:
+                    print(post["url"] + " has already been downloaded")
 
     # Print download stats to console
     def print_stats(self):
