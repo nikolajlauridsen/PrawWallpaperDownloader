@@ -100,6 +100,15 @@ class Scraper:
 
             fo.close()
 
+    # Attempts to re-download all links in the database
+    def re_download(self):
+        self.posts = self.db.get_posts()
+        self.n_posts = len(self.posts)
+        self.download_images()
+        self.print_stats()
+        if self.args.log:
+            self.save_log()
+
     # Run the scraper
     def run(self):
         self.get_posts(self.r.get_subreddit(self.args.subreddit))
