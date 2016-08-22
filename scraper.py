@@ -42,14 +42,13 @@ class Scraper:
 
     # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
-        download_n = 1
         self.n_posts = len(self.posts)
         self.posts, self.skipped_list = self.db.check_links(self.posts)
 
         os.makedirs('wallpapers', exist_ok=True)
-        for submission in self.posts:
+        for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
-                  .format(download_n, self.n_posts), flush=True, end='')
+                  .format(l_id+1, self.n_posts), flush=True, end='')
             # Send requests
             response = requests.get(submission["url"])
 
@@ -67,7 +66,6 @@ class Scraper:
             else:
                 self.failed += 1
                 self.failed_list.append(submission)
-            download_n += 1
 
     # Print download stats to console
     def print_stats(self):
