@@ -22,6 +22,7 @@ class Scraper:
 
     # get posts from reddit and add them to self.posts
     def get_posts(self, subreddit):
+        print('Contacting reddit and fetching urls, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
             if url.endswith(".jpg"):
@@ -39,12 +40,11 @@ class Scraper:
                            "title": submission.title,
                            "date": time.strftime("%d-%m-%Y %H:%M")}
                 self.posts.append(context)
-
-    # Sort out previously downloaded links and download the image links in self.posts
-    def download_images(self):
         self.n_posts = len(self.posts)
         self.posts, self.skipped_list = self.db.check_links(self.posts)
 
+    # Sort out previously downloaded links and download the image links in self.posts
+    def download_images(self):
         os.makedirs('wallpapers', exist_ok=True)
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
@@ -102,7 +102,6 @@ class Scraper:
 
     # Run the scraper
     def run(self):
-        print('Contacting reddit and fetching urls, please hold...')
         self.get_posts(self.r.get_subreddit(self.args.subreddit))
         self.download_images()
         self.save_posts()
