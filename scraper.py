@@ -79,11 +79,29 @@ class Scraper:
             self.db.insert_link(post)
         self.db.save_changes()
 
+    def save_log(self):
+        with open("log.txt", 'w') as fo:
+            fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
+            fo.write("Succeeded: {}\nSkipped: {}\nFailed: {}\n\n".format(self.succeeded, self.skipped, self.failed))
+            if len(self.skipped_list) > 0:
+                fo.write("="*5 + "Begin skipped list" + "="*5 + "\n ")
+                for post in self.skipped_list:
+                    fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
+                fo.write("=" * 5 + "End skipped list" + "=" * 5 + "\n")
+            if len(self.failed_list) > 0:
+                fo.write("="*5 + "Begin failed list" + "="*5 + "\n")
+                for post in self.failed_list:
+                    fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
+                fo.write("=" * 5 + "End failed list" + "=" * 5 + "\n")
+            fo.close()
+
     def run(self):
         print('Fetching URLS...')
         self.get_posts(self.r.get_subreddit(self.args.subreddit))
         self.download_images()
         self.save_posts()
         self.print_stats()
+        if self.args.log:
+            self.save_log()
 
 
