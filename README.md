@@ -1,4 +1,5 @@
 # PrawWallpaperDownloader (Python3)
+[![Build Status](https://travis-ci.org/nikolajlauridsen/PrawWallpaperDownloader.svg?branch=master)](https://travis-ci.org/nikolajlauridsen/PrawWallpaperDownloader)
 
 Download a bunch of wallpapers from the hot sections of r/wallpapers
 
