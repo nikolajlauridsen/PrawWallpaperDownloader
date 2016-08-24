@@ -62,7 +62,7 @@ class Scraper:
                     print('And error occured when downloading image\nCallback: {}'.format(exc))
                 self.callbacks.append(exc)
                 self.failed += 1
-                self.failed_list.append()
+                self.failed_list.append(exc)
 
             file_path = os.path.join('wallpapers',
                                      re.sub(r'[\:/?"<>|()-=]',
