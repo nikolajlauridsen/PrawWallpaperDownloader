@@ -17,6 +17,7 @@ class Scraper:
         self.n_posts = 0
         self.posts = []
         self.failed_list = []
+        self.callbacks = []
         self.skipped_list = []
         self.args = args
 
@@ -54,19 +55,31 @@ class Scraper:
             response = requests.get(submission["url"])
 
             # Save image to disk
-            if response.status_code == 200:
-                file_path = os.path.join('wallpapers',
-                                         re.sub(r'[\:/?"<>|()-=]',
-                                                '', submission["title"][:25]) +
-                                         ".jpg")
+            try:
+                response.raise_for_status()
+            except Exception as exc:
+                if self.args.verbose:
+                    print('And error occured when downloading image\nCallback: {}'.format(exc))
+                self.callbacks.append(exc)
+                self.failed += 1
+                self.failed_list.append()
+
+            file_path = os.path.join('wallpapers',
+                                     re.sub(r'[\:/?"<>|()-=]',
+                                            '', submission["title"][:25]) +
+                                     ".jpg")
+            try:
                 with open(file_path, 'wb') as fo:
                     for chunk in response.iter_content(4096):
                         fo.write(chunk)
                     fo.close()
                 self.succeeded += 1
-            else:
+            except Exception as exc:
+                if self.args.verbose:
+                    print('An error occured when saving the image\nCallback: {}'.format(exc))
                 self.failed += 1
                 self.failed_list.append(submission)
+                self.callbacks.append(exc)
 
     # Print posts in skipped_list to console
     def print_skipped(self):
@@ -108,7 +121,14 @@ class Scraper:
                 fo.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
-                fo.write("Begin skipped list".center(40, '=') + '\n'*2)
+                fo.write("End skipped list".center(40, '=') + '\n'*2)
+
+            if len(self.callbacks) > 0:
+                fo.write("Begin callbacks".center(40, '=') + '\n')
+                for callback in self.callbacks:
+                    fo.write(callback)
+                    fo.write('\n'*2)
+                fo.write('End callbacks'.center(40, '=') + '\n'*2)
 
             fo.close()
 
