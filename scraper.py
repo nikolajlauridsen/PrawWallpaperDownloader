@@ -54,7 +54,7 @@ class Scraper:
             # Send requests
             response = requests.get(submission["url"])
 
-            # Save image to disk
+            # Try to download image
             try:
                 response.raise_for_status()
             except Exception as exc:
@@ -68,6 +68,7 @@ class Scraper:
                                      re.sub(r'[\:/?"<>|()-=]',
                                             '', submission["title"][:25]) +
                                      ".jpg")
+            # Try to save the image to disk
             try:
                 with open(file_path, 'wb') as fo:
                     for chunk in response.iter_content(4096):

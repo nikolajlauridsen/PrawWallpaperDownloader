@@ -3,7 +3,7 @@ python:
  - "3.2"
  - "3.3"
  - "3.4"
- - "3.5"
+# - "3.5" from what I gather pytest doesn't work with py3.5 so I'll disable it for now
 os:
 - "linux"
 install: "pip install -r requirements.txt"
