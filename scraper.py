@@ -71,13 +71,13 @@ class Scraper:
     # Print posts in skipped_list to console
     def print_skipped(self):
         if self.args.verbose:
-            print("="*10 + "skipped posts" + "="*10)
+            print('\n', 'Skipped posts'.center(40, '='))
             for post in self.skipped_list:
                 try:
-                    print(post["title"] + " has already been downloaded, skipping")
+                    print(post["title"] + " has already been downloaded... skipping")
                 except UnicodeEncodeError:
-                    print(post["url"] + " has already been downloaded, skipping")
-            print("="*10 + "end" + "="*10)
+                    print(post["url"] + " has already been downloaded... skipping")
+            print('End list'.center(40, '='), '\n')
 
     # Print download stats to console
     def print_stats(self):
@@ -99,16 +99,16 @@ class Scraper:
             fo.write("Succeeded: {}\nSkipped: {}\nFailed: {}\n\n".format(self.succeeded, self.skipped, self.failed))
 
             if len(self.skipped_list) > 0:
-                fo.write("="*5 + "Begin skipped list" + "="*5 + "\n ")
+                fo.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
-                fo.write("=" * 5 + "End skipped list" + "=" * 5 + "\n")
+                fo.write("End skipped list".center(40, '=') + '\n'*2)
 
             if len(self.failed_list) > 0:
-                fo.write("="*5 + "Begin failed list" + "="*5 + "\n")
+                fo.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
-                fo.write("=" * 5 + "End failed list" + "=" * 5 + "\n")
+                fo.write("Begin skipped list".center(40, '=') + '\n'*2)
 
             fo.close()
 
