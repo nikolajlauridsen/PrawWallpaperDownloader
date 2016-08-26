@@ -65,7 +65,7 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(submission)
 
-            file_path = os.path.join('wallpapers',
+            file_path = os.path.join(self.args.subreddit,
                                      re.sub(r'[\:/?"<>|()-=]',
                                             '', submission["title"][:25]) +
                                      ".jpg")
