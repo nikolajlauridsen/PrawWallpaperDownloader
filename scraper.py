@@ -10,7 +10,7 @@ class Scraper:
 
     def __init__(self, args):
         self.db = Db_handler()
-        self.r = praw.Reddit(user_agent="Wallpaper switcher V0.2.1 by /u/Pusillus")
+        self.r = praw.Reddit(user_agent="PrawWallpaperDownload 0.3.0 by /u/Pusillus")
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
@@ -48,7 +48,10 @@ class Scraper:
 
     # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
-        os.makedirs(self.args.subreddit, exist_ok=True)
+        # Makr folders
+        os.makedirs("Downloads", exist_ok=True)
+        download_folder = os.path.join("Downloads", self.args.subreddit)
+        os.makedirs(download_folder, exist_ok=True)
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
                   .format(l_id+1, self.n_posts), flush=True, end='')
@@ -65,10 +68,10 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(submission)
 
-            file_path = os.path.join(self.args.subreddit,
+            file_path = os.path.join(download_folder,
                                      re.sub(r'[\:/?"<>|()-=]',
-                                            '', submission["title"][:25]) +
-                                     ".jpg")
+                                            '',
+                                            submission["title"][:25]) + ".jpg")
             # Try to save the image to disk
             try:
                 with open(file_path, 'wb') as fo:
@@ -125,13 +128,13 @@ class Scraper:
                 fo.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
-                fo.write("End skipped list".center(40, '=') + '\n'*2)
+                fo.write("End failed list".center(40, '=') + '\n'*2)
 
             # Callbacks
             if len(self.callbacks) > 0:
                 fo.write("Begin callbacks".center(40, '=') + '\n')
                 for callback in self.callbacks:
-                    fo.write(callback)
+                    fo.write(str(callback))
                     fo.write('\n'*2)
                 fo.write('End callbacks'.center(40, '=') + '\n'*2)
 
