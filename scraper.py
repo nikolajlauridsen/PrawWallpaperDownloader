@@ -1,4 +1,5 @@
 from db_handler import Db_handler
+
 import time
 import os
 import requests
@@ -7,6 +8,7 @@ import praw
 
 
 class Scraper:
+    """A class for scraping links on reddit, utilizes Db_handler.py"""
 
     def __init__(self, args):
         self.db = Db_handler()
@@ -21,8 +23,8 @@ class Scraper:
         self.skipped_list = []
         self.args = args
 
-    # get posts from reddit and add them to self.posts
     def get_posts(self, subreddit):
+        """Get and sort posts from reddit"""
         print('Contacting reddit and fetching urls, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
@@ -46,8 +48,8 @@ class Scraper:
         self.posts, self.skipped_list = self.db.check_links(self.posts)
         self.print_skipped()
 
-    # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
+        """Create folders and try to download/save the image links in self.posts"""
         # Make folders
         os.makedirs("Downloads", exist_ok=True)
         download_folder = os.path.join("Downloads", self.args.subreddit)
@@ -76,10 +78,10 @@ class Scraper:
                                             submission["title"][:25]) + ".jpg")
             # Try to save the image to disk
             try:
-                with open(file_path, 'wb') as fo:
+                with open(file_path, 'wb') as image:
                     for chunk in response.iter_content(4096):
-                        fo.write(chunk)
-                    fo.close()
+                        image.write(chunk)
+                    image.close()
                 self.succeeded += 1
             except Exception as exc:
                 if self.args.verbose:
@@ -89,8 +91,8 @@ class Scraper:
                 self.failed_list.append(submission)
                 self.callbacks.append(exc)
 
-    # Print posts in skipped_list to console
     def print_skipped(self):
+        """Print posts in skipped_list to console"""
         if self.args.verbose:
             print('\n', 'Skipped posts'.center(40, '='))
             for post in self.skipped_list:
@@ -100,8 +102,8 @@ class Scraper:
                     print(post["url"] + " has already been downloaded... skipping")
             print('End list'.center(40, '='), '\n')
 
-    # Print download stats to console
     def print_stats(self):
+        """Print download stats to console"""
         print("\n")
         self.skipped = len(self.skipped_list)
         print('Posts downloaded: {}/{} \nSkipped: {}\n'
@@ -110,54 +112,54 @@ class Scraper:
                                   self.skipped,
                                   self.failed))
 
-    # Save posts currently in self.posts to database
     def save_posts(self):
+        """Save posts currently in self.posts to database"""
         for post in self.posts:
             self.db.insert_link(post)
         self.db.save_changes()
 
-    # Save logs to file
     def save_log(self):
-        with open("log.txt", 'w') as fo:
+        """Build log file"""
+        with open("log.txt", 'w') as log:
             # Introduction
-            fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
-            fo.write("Succeeded: {}\nSkipped: {}\n"
+            log.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
+            log.write("Succeeded: {}\nSkipped: {}\n"
                      "Failed: {}\n\n".format(self.succeeded,
                                              self.skipped,
                                              self.failed))
 
             # Skipped list
             if len(self.skipped_list) > 0:
-                fo.write("Begin skipped list".center(40, '=') + '\n')
+                log.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
-                    fo.write("{}\n{}\n{}\n"
+                    log.write("{}\n{}\n{}\n"
                              "\n".format(post["title"],
                                          post["url"],
                                          post["date"]))
-                fo.write("End skipped list".center(40, '=') + '\n'*2)
+                log.write("End skipped list".center(40, '=') + '\n'*2)
 
             # Failed list
             if len(self.failed_list) > 0:
-                fo.write("Begin failed list".center(40, '=') + '\n')
+                log.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
-                    fo.write("{}\n{}\n{}\n"
+                    log.write("{}\n{}\n{}\n"
                              "\n".format(post["title"],
                                          post["url"],
                                          post["date"]))
-                fo.write("End failed list".center(40, '=') + '\n'*2)
+                log.write("End failed list".center(40, '=') + '\n'*2)
 
             # Callbacks
             if len(self.callbacks) > 0:
-                fo.write("Begin callbacks".center(40, '=') + '\n')
+                log.write("Begin callbacks".center(40, '=') + '\n')
                 for callback in self.callbacks:
-                    fo.write(str(callback))
-                    fo.write('\n'*2)
-                fo.write('End callbacks'.center(40, '=') + '\n'*2)
+                    log.write(str(callback))
+                    log.write('\n'*2)
+                log.write('End callbacks'.center(40, '=') + '\n'*2)
 
-            fo.close()
+            log.close()
 
-    # Attempts to re-download all links in the database
     def re_download(self):
+        """Attempts to re-download all links in the database"""
         self.posts = self.db.get_posts()
         self.n_posts = len(self.posts)
         self.download_images()
@@ -165,8 +167,8 @@ class Scraper:
         if self.args.log:
             self.save_log()
 
-    # Run the scraper
     def run(self):
+        """Run the scraper"""
         self.get_posts(self.r.get_subreddit(self.args.subreddit))
         self.download_images()
         self.save_posts()
