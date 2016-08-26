@@ -31,7 +31,8 @@ class Scraper:
                            "title": submission.title,
                            "date": time.strftime("%d-%m-%Y %H:%M")}
                 self.posts.append(context)
-                # Imgur support
+
+            # Imgur support
             elif ("imgur.com" in url) and ("/a/" not in url):
                 if url.endswith("/new"):
                     url = url.rsplit("/", 1)[0]
@@ -47,7 +48,7 @@ class Scraper:
 
     # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
-        os.makedirs('wallpapers', exist_ok=True)
+        os.makedirs(self.args.subreddit, exist_ok=True)
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
                   .format(l_id+1, self.n_posts), flush=True, end='')
@@ -112,18 +113,21 @@ class Scraper:
             fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
             fo.write("Succeeded: {}\nSkipped: {}\nFailed: {}\n\n".format(self.succeeded, self.skipped, self.failed))
 
+            # Skipped list
             if len(self.skipped_list) > 0:
                 fo.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
                 fo.write("End skipped list".center(40, '=') + '\n'*2)
 
+            # Failed list
             if len(self.failed_list) > 0:
                 fo.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
                     fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
                 fo.write("End skipped list".center(40, '=') + '\n'*2)
 
+            # Callbacks
             if len(self.callbacks) > 0:
                 fo.write("Begin callbacks".center(40, '=') + '\n')
                 for callback in self.callbacks:
