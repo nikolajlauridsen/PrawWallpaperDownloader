@@ -10,7 +10,8 @@ class Db_handler():
     def __init__(self):
         self.conn = lite.connect('wallpaper_base.db')
         self.c = self.conn.cursor()
-        self.c.execute("CREATE TABLE IF NOT EXISTS downloads (Date TEXT, Link TEXT PRIMARY KEY, Title TEXT)")
+        self.c.execute("CREATE TABLE IF NOT EXISTS downloads "
+                       "(Date TEXT, Link TEXT PRIMARY KEY, Title TEXT)")
 
     # Insert a link into the database
     def insert_link(self, submission):

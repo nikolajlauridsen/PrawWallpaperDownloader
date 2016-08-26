@@ -48,10 +48,11 @@ class Scraper:
 
     # Sort out previously downloaded links and download the image links in self.posts
     def download_images(self):
-        # Makr folders
+        # Make folders
         os.makedirs("Downloads", exist_ok=True)
         download_folder = os.path.join("Downloads", self.args.subreddit)
         os.makedirs(download_folder, exist_ok=True)
+
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
                   .format(l_id+1, self.n_posts), flush=True, end='')
@@ -63,7 +64,8 @@ class Scraper:
                 response.raise_for_status()
             except Exception as exc:
                 if self.args.verbose:
-                    print('And error occured when downloading image\nCallback: {}'.format(exc))
+                    print('And error occured when downloading image\n'
+                          'Callback: {}'.format(exc))
                 self.callbacks.append(exc)
                 self.failed += 1
                 self.failed_list.append(submission)
@@ -81,7 +83,8 @@ class Scraper:
                 self.succeeded += 1
             except Exception as exc:
                 if self.args.verbose:
-                    print('An error occured when saving the image\nCallback: {}'.format(exc))
+                    print('An error occured when saving the image\n'
+                          'Callback: {}'.format(exc))
                 self.failed += 1
                 self.failed_list.append(submission)
                 self.callbacks.append(exc)
@@ -101,8 +104,11 @@ class Scraper:
     def print_stats(self):
         print("\n")
         self.skipped = len(self.skipped_list)
-        print('Posts downloaded: {}/{} \nSkipped: {}\nFailed: {}'
-              .format(self.succeeded, self.n_posts, self.skipped, self.failed))
+        print('Posts downloaded: {}/{} \nSkipped: {}\n'
+              'Failed: {}'.format(self.succeeded,
+                                  self.n_posts,
+                                  self.skipped,
+                                  self.failed))
 
     # Save posts currently in self.posts to database
     def save_posts(self):
@@ -113,21 +119,31 @@ class Scraper:
     # Save logs to file
     def save_log(self):
         with open("log.txt", 'w') as fo:
+            # Introduction
             fo.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
-            fo.write("Succeeded: {}\nSkipped: {}\nFailed: {}\n\n".format(self.succeeded, self.skipped, self.failed))
+            fo.write("Succeeded: {}\nSkipped: {}\n"
+                     "Failed: {}\n\n".format(self.succeeded,
+                                             self.skipped,
+                                             self.failed))
 
             # Skipped list
             if len(self.skipped_list) > 0:
                 fo.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
-                    fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
+                    fo.write("{}\n{}\n{}\n"
+                             "\n".format(post["title"],
+                                         post["url"],
+                                         post["date"]))
                 fo.write("End skipped list".center(40, '=') + '\n'*2)
 
             # Failed list
             if len(self.failed_list) > 0:
                 fo.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
-                    fo.write("{}\n{}\n{}\n\n".format(post["title"], post["url"], post["date"]))
+                    fo.write("{}\n{}\n{}\n"
+                             "\n".format(post["title"],
+                                         post["url"],
+                                         post["date"]))
                 fo.write("End failed list".center(40, '=') + '\n'*2)
 
             # Callbacks
