@@ -5,12 +5,13 @@ import os
 import requests
 import re
 import praw
+import argparse
 
 
 class Scraper:
     """A class for scraping links on reddit, utilizes Db_handler.py"""
 
-    def __init__(self, args):
+    def __init__(self):
         self.db = Db_handler()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownload 0.3.0 by /u/Pusillus")
         self.succeeded = 0
@@ -21,7 +22,28 @@ class Scraper:
         self.failed_list = []
         self.callbacks = []
         self.skipped_list = []
-        self.args = args
+        self.args = self.parse_arguments()
+
+    def parse_arguments(self):
+        """Parse arguments from commandline"""
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-s", "--subreddit",
+                            help="specify subreddit to scrape",
+                            default="wallpapers")
+        parser.add_argument("-l", "--limit",
+                            help="set amount of posts to sift through (default 25)",
+                            default=25, type=int)
+        parser.add_argument("--log",
+                            help="save a log of wallpapers downloaded/skipped/failed",
+                            action="store_true", default=False)
+        parser.add_argument("-re", "--redownload",
+                            help="attempt to download all the links in the database",
+                            action="store_true", default=False)
+        parser.add_argument("-v", "--verbose", help="increase output detail",
+                            action="store_true",
+                            default=False)
+        args = parser.parse_args()
+        return args
 
     def get_posts(self, subreddit):
         """Get and sort posts from reddit"""
