@@ -191,7 +191,10 @@ class Scraper:
 
     def run(self):
         """Run the scraper"""
-        self.get_posts(self.r.get_subreddit(self.args.subreddit))
+        try:
+            self.get_posts(self.r.get_subreddit(self.args.subreddit))
+        except praw.errors.InvalidSubreddit:
+            print("It appears like you mis typed the subreddit name")
         self.download_images()
         self.save_posts()
         self.print_stats()
