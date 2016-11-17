@@ -162,18 +162,24 @@ class Scraper:
             if len(self.skipped_list) > 0:
                 log.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
-                    log.write("{}\n{}\n"
-                             "\n".format(post["title"],
-                                         post["url"]))
+                    try:
+                        log.write("{}\n{}\n"
+                                 "\n".format(post["title"],
+                                             post["url"]))
+                    except UnicodeEncodeError:
+                        pass
                 log.write("End skipped list".center(40, '=') + '\n'*2)
 
             # Failed list
             if len(self.failed_list) > 0:
                 log.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
-                    log.write("{}\n{}\n"
-                             "\n".format(post["title"],
-                                         post["url"]))
+                    try:
+                        log.write("{}\n{}\n"
+                                 "\n".format(post["title"],
+                                             post["url"]))
+                    except UnicodeEncodeError:
+                        pass
                 log.write("End failed list".center(40, '=') + '\n'*2)
 
             # Deleted list
