@@ -6,7 +6,7 @@ import requests
 import re
 import praw
 import argparse
-
+from PIL import Image
 
 class Scraper:
     """A class for scraping links on reddit, utilizes Db_handler.py"""
@@ -14,14 +14,18 @@ class Scraper:
     def __init__(self):
         self.db = Db_handler()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownload 0.3.0 by /u/Pusillus")
+        self.min_width = 1280
+        self.min_height = 720
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
         self.n_posts = 0
         self.posts = []
+        self.downloaded_images = []
         self.failed_list = []
         self.callbacks = []
         self.skipped_list = []
+        self.deleted_images = []
         self.args = self.parse_arguments()
 
     def parse_arguments(self):
@@ -105,6 +109,7 @@ class Scraper:
                         image.write(chunk)
                     image.close()
                 self.succeeded += 1
+                self.downloaded_images.append(file_path)
             except Exception as exc:
                 if self.args.verbose:
                     print('An error occured when saving the image\n'
@@ -129,10 +134,11 @@ class Scraper:
         print("\n")
         self.skipped = len(self.skipped_list)
         print('Posts downloaded: {}/{} \nSkipped: {}\n'
-              'Failed: {}'.format(self.succeeded,
-                                  self.n_posts,
-                                  self.skipped,
-                                  self.failed))
+              'Failed: {}\n Deleted: {}'.format(self.succeeded,
+                                                self.n_posts,
+                                                self.skipped,
+                                                self.failed,
+                                                len(self.deleted_images)))
 
     def save_posts(self):
         """Save posts currently in self.posts to database"""
@@ -170,6 +176,12 @@ class Scraper:
                                          post["date"]))
                 log.write("End failed list".center(40, '=') + '\n'*2)
 
+            # Deleted list
+            if len(self.deleted_images) > 0:
+                log.write('Begin deleted list'.center(40, '=') + '\n'*2)
+                for image in self.deleted_images:
+                    log.write("{} deleted due to size".format(image))
+
             # Callbacks
             if len(self.callbacks) > 0:
                 log.write("Begin callbacks".center(40, '=') + '\n')
@@ -189,6 +201,18 @@ class Scraper:
         if self.args.log:
             self.save_log()
 
+    def clean_up(self):
+        """Examines all downloaded images, deleting duds"""
+        print('\nCleaning up')
+        for image_path in self.downloaded_images:
+            image = Image.open(image_path)
+            if image.size[0] < self.min_width or image.size[1] < self.min_height:
+                image.close()
+                os.remove(image_path)
+                self.deleted_images.append(image_path)
+            else:
+                image.close()
+
     def run(self):
         """Run the scraper"""
         try:
@@ -197,6 +221,7 @@ class Scraper:
             print("It appears like you mis typed the subreddit name")
         self.download_images()
         self.save_posts()
+        self.clean_up()
         self.print_stats()
         if self.args.log:
             self.save_log()
