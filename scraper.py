@@ -134,10 +134,10 @@ class Scraper:
         print("\n")
         self.skipped = len(self.skipped_list)
         print('Posts downloaded: {}/{} \nSkipped: {}\n'
-              'Failed: {}\n Deleted: {}'.format(self.succeeded,
-                                                self.n_posts,
-                                                self.skipped,
-                                                self.failed,
+              'Failed: {}\nDeleted: {}'.format(self.succeeded,
+                                               self.n_posts,
+                                               self.skipped,
+                                               self.failed,
                                                 len(self.deleted_images)))
 
     def save_posts(self):
@@ -160,28 +160,26 @@ class Scraper:
             if len(self.skipped_list) > 0:
                 log.write("Begin skipped list".center(40, '=') + '\n')
                 for post in self.skipped_list:
-                    log.write("{}\n{}\n{}\n"
+                    log.write("{}\n{}\n"
                              "\n".format(post["title"],
-                                         post["url"],
-                                         post["date"]))
+                                         post["url"]))
                 log.write("End skipped list".center(40, '=') + '\n'*2)
 
             # Failed list
             if len(self.failed_list) > 0:
                 log.write("Begin failed list".center(40, '=') + '\n')
                 for post in self.failed_list:
-                    log.write("{}\n{}\n{}\n"
+                    log.write("{}\n{}\n"
                              "\n".format(post["title"],
-                                         post["url"],
-                                         post["date"]))
+                                         post["url"]))
                 log.write("End failed list".center(40, '=') + '\n'*2)
 
             # Deleted list
             if len(self.deleted_images) > 0:
                 log.write('Begin deleted list'.center(40, '=') + '\n'*2)
                 for image in self.deleted_images:
-                    log.write("{} deleted due to size".format(image))
-
+                    log.write("{} deleted due to size\n\n".format(image))
+                log.write('End deleted list'.center(50, '=' + '\n'*2))
             # Callbacks
             if len(self.callbacks) > 0:
                 log.write("Begin callbacks".center(40, '=') + '\n')
@@ -208,7 +206,10 @@ class Scraper:
             image = Image.open(image_path)
             if image.size[0] < self.min_width or image.size[1] < self.min_height:
                 image.close()
-                os.remove(image_path)
+                try:
+                    os.remove(image_path)
+                except PermissionError:
+                    print('\nCan\'t delete ' + image_path + ' image is currently in use')
                 self.deleted_images.append(image_path)
             else:
                 image.close()
@@ -221,7 +222,8 @@ class Scraper:
             print("It appears like you mis typed the subreddit name")
         self.download_images()
         self.save_posts()
-        self.clean_up()
+        if len(self.downloaded_images) > 0:
+            self.clean_up()
         self.print_stats()
         if self.args.log:
             self.save_log()
