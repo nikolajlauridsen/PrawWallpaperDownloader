@@ -72,9 +72,22 @@ class Scraper:
                            "title": submission.title,
                            "date": time.strftime("%d-%m-%Y %H:%M")}
                 self.posts.append(context)
+        # Save amount of valid imagages
         self.n_posts = len(self.posts)
+        # Sort out previously downloaded images
         self.posts, self.skipped_list = self.db.check_links(self.posts)
         self.print_skipped()
+
+    def print_skipped(self):
+        """Print posts in skipped_list to console"""
+        if self.args.verbose:
+            print('\n', 'Skipped posts'.center(40, '='))
+            for post in self.skipped_list:
+                try:
+                    print(post["title"] + " has already been downloaded... skipping")
+                except UnicodeEncodeError:
+                    print(post["url"] + " has already been downloaded... skipping")
+            print('End list'.center(40, '='), '\n')
 
     def download_images(self):
         """Create folders and try to download/save the image links in self.posts"""
@@ -119,17 +132,6 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(submission)
                 self.callbacks.append(exc)
-
-    def print_skipped(self):
-        """Print posts in skipped_list to console"""
-        if self.args.verbose:
-            print('\n', 'Skipped posts'.center(40, '='))
-            for post in self.skipped_list:
-                try:
-                    print(post["title"] + " has already been downloaded... skipping")
-                except UnicodeEncodeError:
-                    print(post["url"] + " has already been downloaded... skipping")
-            print('End list'.center(40, '='), '\n')
 
     def print_stats(self):
         """Print download stats to console"""
@@ -198,15 +200,6 @@ class Scraper:
 
             log.close()
 
-    def re_download(self):
-        """Attempts to re-download all links in the database"""
-        self.posts = self.db.get_posts()
-        self.n_posts = len(self.posts)
-        self.download_images()
-        self.print_stats()
-        if self.args.log:
-            self.save_log()
-
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
         print('\nCleaning up')
@@ -221,6 +214,17 @@ class Scraper:
                 self.deleted_images.append(image_path)
             else:
                 image.close()
+
+    def re_download(self):
+        """Attempts to re-download all links in the database"""
+        self.posts = self.db.get_posts()
+        self.n_posts = len(self.posts)
+        self.download_images()
+        if len(self.downloaded_images) > 0 and not self.args.noclean:
+            self.clean_up()
+        self.print_stats()
+        if self.args.log:
+            self.save_log()
 
     def run(self):
         """Run the scraper"""
