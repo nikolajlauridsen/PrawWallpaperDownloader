@@ -46,6 +46,8 @@ class Scraper:
         parser.add_argument("-v", "--verbose", help="increase output detail",
                             action="store_true",
                             default=False)
+        parser.add_argument('-nc', "--noclean", help="Skip cleaning off small images",
+                            action="store_true", default=False)
         args = parser.parse_args()
         return args
 
@@ -179,7 +181,7 @@ class Scraper:
                 log.write('Begin deleted list'.center(40, '=') + '\n'*2)
                 for image in self.deleted_images:
                     log.write("{} deleted due to size\n\n".format(image))
-                log.write('End deleted list'.center(50, '=' + '\n'*2))
+                log.write('End deleted list'.center(50, '=') + '\n'*2)
             # Callbacks
             if len(self.callbacks) > 0:
                 log.write("Begin callbacks".center(40, '=') + '\n')
@@ -222,7 +224,7 @@ class Scraper:
             print("It appears like you mis typed the subreddit name")
         self.download_images()
         self.save_posts()
-        if len(self.downloaded_images) > 0:
+        if len(self.downloaded_images) > 0 and not self.args.noclean:
             self.clean_up()
         self.print_stats()
         if self.args.log:
