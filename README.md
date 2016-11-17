@@ -2,7 +2,7 @@
 
 Download a bunch of wallpapers from the hot sections of r/wallpapers (or specify your own subreddit!)
 
-Going in to more detail the script will:
+Going into a little more detail the script will:
 
 1. Query Reddit for an amount of posts (25 by default)
 2. Sift through the links finding direct image links and imgur posts
