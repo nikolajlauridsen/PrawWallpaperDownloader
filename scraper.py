@@ -29,8 +29,8 @@ class Scraper:
         self.callbacks = []
         self.skipped_list = []
         self.deleted_images = []
-        self.args = self.parse_arguments()
         self.config = configurator.get_config()
+        self.args = self.parse_arguments()
 
     def parse_arguments(self):
         """Parse arguments from commandline"""
@@ -39,8 +39,9 @@ class Scraper:
                             help="specify subreddit to scrape",
                             default="wallpapers")
         parser.add_argument("-l", "--limit",
-                            help="set amount of posts to sift through (default 25)",
-                            default=25, type=int)
+                            help="set amount of posts to sift through "
+                                 "(default " + self.config['Limit'] + ")",
+                            default=int(self.config['Limit']), type=int)
         parser.add_argument("--log",
                             help="save a log of wallpapers downloaded/skipped/failed",
                             action="store_true", default=False)
