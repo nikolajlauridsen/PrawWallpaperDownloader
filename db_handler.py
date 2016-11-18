@@ -15,10 +15,13 @@ class Db_handler():
 
     # Insert a link into the database
     def insert_link(self, submission):
-        self.c.execute("INSERT INTO downloads VALUES (?,?,?)",
-                       (submission["date"],
-                        submission["url"],
-                        submission["title"]))
+        try:
+            self.c.execute("INSERT INTO downloads VALUES (?,?,?)",
+                          (submission["date"],
+                           submission["url"],
+                           submission["title"]))
+        except lite.IntegrityError:
+            pass # Assume it's a filthy reposter and skip it
 
     # Return all posts downloaded as a list of dictionaries
     def get_posts(self):

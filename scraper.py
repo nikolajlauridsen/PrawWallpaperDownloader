@@ -16,7 +16,7 @@ class Scraper:
 
     def __init__(self):
         self.db = Db_handler()
-        self.r = praw.Reddit(user_agent="PrawWallpaperDownload 0.3.0 by /u/Pusillus")
+        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 0.9.0 by /u/Pusillus")
         self.min_width = 1280
         self.min_height = 720
         self.succeeded = 0
