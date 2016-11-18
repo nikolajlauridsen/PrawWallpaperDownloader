@@ -8,7 +8,7 @@ Going into a little more detail the script will:
 2. Sift through the links finding direct image links and imgur posts
 3. It will check whether any of the links has been downloaded before, sorting out those who has 
 4. Download all the now sorted links
-5. Go through all downloaded images deleting any images less than 1280x720 (Customizing the size will come)
+5. Go through all downloaded images deleting any images less than 1280x720 (Enter configuration mode to change this)
 
 
 Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)
@@ -41,6 +41,7 @@ py wallpaper_downloader.py -s MinimalWallpaper -l 100 --log
 ```
 
 ### Optional arguments
+* -con or --config enter configuration mode
 * --subreddit \<subreddit> or -s \<subreddit> specify which subreddit to download images from, omit the /r/ (default is wallpapers)
 * --limit \<number> or -l \<number> specify how many posts to search as a whole number (default is 25)
 * --re or -r will try to re download every post previously downloaded
