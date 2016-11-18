@@ -1,4 +1,5 @@
 from db_handler import Db_handler
+from configurator import Configurator
 
 import time
 import os
@@ -7,6 +8,8 @@ import re
 import praw
 import argparse
 from PIL import Image
+
+configurator = Configurator()
 
 class Scraper:
     """A class for scraping links on reddit, utilizes Db_handler.py"""
@@ -27,6 +30,7 @@ class Scraper:
         self.skipped_list = []
         self.deleted_images = []
         self.args = self.parse_arguments()
+        self.config = configurator.get_config()
 
     def parse_arguments(self):
         """Parse arguments from commandline"""
@@ -48,6 +52,8 @@ class Scraper:
                             default=False)
         parser.add_argument('-nc', "--noclean", help="Skip cleaning off small images",
                             action="store_true", default=False)
+        parser.add_argument('-con', '--configure', help="Change settings",
+                            action='store_true', default=False)
         args = parser.parse_args()
         return args
 
@@ -204,8 +210,12 @@ class Scraper:
         """Examines all downloaded images, deleting duds"""
         print('\nCleaning up')
         for image_path in self.downloaded_images:
-            image = Image.open(image_path)
-            if image.size[0] < self.min_width or image.size[1] < self.min_height:
+            try:
+                image = Image.open(image_path)
+            except OSError:
+                continue
+            if image.size[0] < int(self.config['MinWidth'])\
+                    or image.size[1] < int(self.config['MinHeight']):
                 image.close()
                 try:
                     os.remove(image_path)
