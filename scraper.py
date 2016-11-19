@@ -37,7 +37,7 @@ class Scraper:
         parser = argparse.ArgumentParser()
         parser.add_argument("-s", "--subreddit",
                             help="specify subreddit to scrape",
-                            default="wallpapers")
+                            default=self.config['Sub'])
         parser.add_argument("-l", "--limit",
                             help="set amount of posts to sift through "
                                  "(default " + self.config['Limit'] + ")",
@@ -60,7 +60,7 @@ class Scraper:
 
     def get_posts(self, subreddit):
         """Get and sort posts from reddit"""
-        print('Contacting reddit and fetching urls, please hold...')
+        print('Contacting reddit, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
             if url.endswith(".jpg"):
@@ -240,6 +240,7 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
+            print('Getting posts from: ' + self.args.subreddit)
             self.get_posts(self.r.get_subreddit(self.args.subreddit))
         except praw.errors.InvalidSubreddit:
             print("It appears like you mis typed the subreddit name")

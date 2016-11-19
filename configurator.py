@@ -14,6 +14,7 @@ class Configurator():
     def create_default_config(self):
         self.config['DEFAULT'] = {'MinWidth':  '1280',
                                   'MinHeight': '720',
+                                  'Sub':       'wallpapers',
                                   'Limit':     '25',
                                   'Clean':     'yes',
                                   'Sort':      'yes'}
@@ -28,12 +29,14 @@ class Configurator():
         print('Choose setting to change')
         print('\nConfig menu:')
         print('1) Minimum width: {}\n2) Minimum height: {}\n'
-              '3) Post limit: {}\n4) Reset to default\n5) Exit'
+              '3) Post limit: {}\n4) Default subreddit: {}\n'
+              '5) Reset to default\n6) Exit'
               .format(self.config['user']['MinWidth'],
                       self.config['user']['MinHeight'],
-                      self.config['user']['Limit']))
-        u_input = input('Menu: ')
+                      self.config['user']['Limit'],
+                      self.config['user']['Sub']))
 
+        u_input = input('Menu: ')
         if u_input == '1':
             self.config['user']['MinWidth'] = input('New minimum width: ')
             self.save_config()
@@ -44,9 +47,14 @@ class Configurator():
             self.config['user']['Limit'] = input('New post limit: ')
             self.save_config()
         elif u_input == '4':
-            self.reset_config()
-        elif u_input == '5':
+            self.config['user']['Sub'] = input('New default subreddit: ')
             self.save_config()
+        elif u_input == '5':
+            self.reset_config()
+        elif u_input == '6':
+            self.save_config()
+        else:
+            print('Invalid input')
 
     def save_config(self):
         with open('config.ini', 'w') as configfile:
