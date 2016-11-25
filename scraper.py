@@ -17,8 +17,6 @@ class Scraper:
     def __init__(self):
         self.db = Db_handler()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 0.9.0 by /u/Pusillus")
-        self.min_width = 1280
-        self.min_height = 720
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
@@ -142,14 +140,17 @@ class Scraper:
 
     def print_stats(self):
         """Print download stats to console"""
-        print("\n")
+        print()
         self.skipped = len(self.skipped_list)
+        new_images = self.succeeded-len(self.deleted_images)
         print('Posts downloaded: {}/{} \nSkipped: {}\n'
-              'Failed: {}\nDeleted: {}'.format(self.succeeded,
-                                               self.n_posts,
-                                               self.skipped,
-                                               self.failed,
-                                                len(self.deleted_images)))
+              'Failed: {}\nDeleted: {}\n'
+              'New images: {}'.format(self.succeeded,
+                                      self.n_posts,
+                                      self.skipped,
+                                      self.failed,
+                                      len(self.deleted_images),
+   				                      new_images))
 
     def save_posts(self):
         """Save posts currently in self.posts to database"""
