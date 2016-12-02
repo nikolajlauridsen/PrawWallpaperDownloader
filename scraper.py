@@ -11,10 +11,7 @@ import argparse
 from PIL import Image
 
 configurator = Configurator()
-"""
- TODO: CLEAN UP!
-     : Maybe make a dedicated function for download errors
-"""
+
 class Scraper:
     """A class for scraping links on reddit, utilizes DbHandler.py,
     and configurator.py"""
@@ -65,7 +62,7 @@ class Scraper:
 
     def get_posts(self, subreddit):
         """Get and sort posts from reddit"""
-        albums = []
+        albums = []  # Array to hold all the album elements for later.
         print('Contacting reddit, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
@@ -105,30 +102,37 @@ class Scraper:
 
         for _id, album in enumerate(albums):
             print("\rHandling album: {}/{}".format(_id+1,n_albums), end='')
+            # Download imgur album
             res = requests.get(album["url"])
             try:
                 res.raise_for_status()
             except Exception as exc:
-                self.callbacks.append(exc)
-                self.failed += 1
-                self.failed_list.append(album)
-                if self.args.verbose:
-                    # \033[F should return cursor to last line
-                    # But this is not guranteed for all consoles
-                    # Maybe look into curse library
-                    print('\nAn album error occured: ' + str(exc), end='\033[F')
+                self.handle_error(exc, album)
                 continue
 
+            # Parse through the html fetching all link elements
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
             if len(link_elements) > 0:
-                for n, ele in enumerate(link_elements):
+                for a_id, ele in enumerate(link_elements):
+                    # Put the data in context for later
                     context = {"url"  : "http:" + ele.get('href'),
                                "title": album["title"],
-                               "id"   : n,
+                               "id"   : a_id,
                                "date" : album["date"]}
                     self.posts.append(context)
         print() #Add missing newline from printing album nr
+
+    def handle_error(self, err, post):
+        """Handles error stats and prints a message if verbose is enabled"""
+        self.callbacks.append(err)
+        self.failed += 1
+        self.failed_list.append(post)
+        if self.args.verbose:
+            # \033[F should return cursor to last line
+            # But this is not guranteed for all consoles
+            # Maybe look into curse library
+            print('\nAn album error occured: ' + str(err), end='\033[F')
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -158,18 +162,17 @@ class Scraper:
             try:
                 response.raise_for_status()
             except Exception as exc:
-                if self.args.verbose:
-                    print('And error occured when downloading image\n'
-                          'Callback: {}'.format(exc), end='\033[F')
-                self.callbacks.append(exc)
-                self.failed += 1
-                self.failed_list.append(submission)
+                self.handle_error(exc, submission)
 
+            # Try to determine if it's a .png, fall back to .jpg if not
+            # Most modern operating systems will open the file regardless
+            # of format suffix
             if submission["url"].endswith('.png'):
                 format = '.png'
             else:
                 format = '.jpg'
-
+            # If there's an id key in the submission it's from an album and
+            # should be suffixed with it's position within that album
             if 'id' in submission:
                 file_path = os.path.join(download_folder,
                                          re.sub(r'[\\/:*?"<>|]',
@@ -190,12 +193,7 @@ class Scraper:
                 self.succeeded += 1
                 self.downloaded_images.append(file_path)
             except Exception as exc:
-                if self.args.verbose:
-                    print('An error occured when saving the image\n'
-                          'Callback: {}'.format(exc), end='\033[F')
-                self.failed += 1
-                self.failed_list.append(submission)
-                self.callbacks.append(exc)
+                self.handle_error(exc, submission)
 
     def print_stats(self):
         """Print download stats to console"""
