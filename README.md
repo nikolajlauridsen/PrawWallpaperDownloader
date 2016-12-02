@@ -25,6 +25,7 @@ py -m pip install -r requirements.txt
 #### Requirements
 * praw
 * requests
+* bs4
 * pillow
 
 ## Usage
