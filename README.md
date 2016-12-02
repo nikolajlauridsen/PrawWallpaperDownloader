@@ -28,16 +28,16 @@ py -m pip install -r requirements.txt
 * pillow
 
 ## Usage
-The script can be run by double clicking wallpaper_downloader.py or via the commandline with the latter being the best option since the script accepts a variety of optional arguments
+The script can be run by double clicking prawpapers.py or via the commandline with the latter being the best option since the script accepts a variety of optional arguments
 
 #### Examples
 Basic use: search through the first 25 posts of /r/wallpapers
 ```
-py wallpaper_downloader.py
+py prawpapers.py
 ```
 "Advanced" use: Search the first 100 posts of /r/MinimalWallpaper and save a log
 ```
-py wallpaper_downloader.py -s MinimalWallpaper -l 100 --log
+py prawpapers.py -s MinimalWallpaper -l 100 --log
 ```
 
 ### Optional arguments
@@ -46,5 +46,6 @@ py wallpaper_downloader.py -s MinimalWallpaper -l 100 --log
 * --limit \<number> or -l \<number> specify how many posts to search as a whole number (default is 25)
 * --re or -r will try to re download every post previously downloaded
 * --nc or --noclean don't delete small images
+* --ns or --nosort skip sorting out previosuly downloaded images
 * --log save a log of posts skipped
 * --verbose or -v print skipped posts to console

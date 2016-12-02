@@ -49,8 +49,10 @@ class Scraper:
         parser.add_argument("-v", "--verbose", help="increase output detail",
                             action="store_true",
                             default=False)
-        parser.add_argument('-nc', "--noclean", help="Skip cleaning off small images",
-                            action="store_true", default=False)
+        parser.add_argument('-nc', "--noclean", help="Skip cleaning off small images (Cleaning: " + self.config['Clean'] + ")",
+                            action="store_true", default= not self.config.getboolean('Clean'))
+        parser.add_argument('-ns', '--nosort', help="Skip sorting out previously downloaded images (Sorting: {})".format(self.config['sort']),
+                            action="store_true", default= not self.config.getboolean('Sort'))
         parser.add_argument('-con', '--configure', help="Change settings",
                             action='store_true', default=False)
         args = parser.parse_args()
@@ -80,8 +82,9 @@ class Scraper:
         # Save amount of valid imagages
         self.n_posts = len(self.posts)
         # Sort out previously downloaded images
-        self.posts, self.skipped_list = self.db.check_links(self.posts)
-        self.print_skipped()
+        if not self.args.nosort:
+            self.posts, self.skipped_list = self.db.check_links(self.posts)
+            self.print_skipped()
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -103,7 +106,7 @@ class Scraper:
 
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
-                  .format(l_id+1, self.n_posts), flush=True, end='')
+                  .format(l_id+1, len(self.posts)), flush=True, end='')
             # Send requests
             response = requests.get(submission["url"])
 

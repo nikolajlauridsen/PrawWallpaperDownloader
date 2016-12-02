@@ -10,3 +10,4 @@ elif scraper.args.configure:
     config.menu()
 else:
     scraper.run()
+
