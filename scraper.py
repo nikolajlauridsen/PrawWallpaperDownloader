@@ -4,13 +4,18 @@ from configurator import Configurator
 import time
 import os
 import requests
+import bs4
 import re
 import praw
 import argparse
 from PIL import Image
 
 configurator = Configurator()
-
+"""
+ TODO: CLEAN UP!
+     : Save with proper format
+     : Maybe make a dedicated function for download errors
+"""
 class Scraper:
     """A class for scraping links on reddit, utilizes DbHandler.py,
     and configurator.py"""
@@ -61,6 +66,7 @@ class Scraper:
 
     def get_posts(self, subreddit):
         """Get and sort posts from reddit"""
+        albums = []
         print('Contacting reddit, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
@@ -80,12 +86,47 @@ class Scraper:
                            "title": submission.title,
                            "date": time.strftime("%d-%m-%Y %H:%M")}
                 self.posts.append(context)
+            elif ("imgur.com" in url) and ("/a/" in url):
+                album_context = {"url"  : url,
+                                 "title": submission.title,
+                                 "date": time.strftime("%d-%m-%Y %H:%M")}
+                albums.append(album_context)
+        # Extract all image links from the imgur albums
+        print("Handling albums.")
+        self.handle_albums(albums)
         # Save amount of valid imagages
         self.n_posts = len(self.posts)
         # Sort out previously downloaded images
         if not self.args.nosort:
             self.posts, self.skipped_list = self.db.sort_links(self.posts)
             self.print_skipped()
+
+    def handle_albums(self, albums):
+        """Extract all links from a list of imgur albums"""
+
+        for _id, album in enumerate(albums):
+            print("Fetching:" + album["url"] + "\nID: " + str(_id))
+            res = requests.get(album["url"])
+            try:
+                res.raise_for_status()
+            except Exception as exc:
+                self.callbacks.append(exc)
+                self.failed += 1
+                self.failed_list.append(album)
+                if self.args.verbose:
+                    print('An album error occured: ' + str(exc))
+                continue
+
+            soup = bs4.BeautifulSoup(res.text, 'html.parser')
+            link_elements = soup.select('a.zoom')
+            if len(link_elements) > 0:
+                for n, ele in enumerate(link_elements):
+                    print("Found element:" +ele.get('href'))
+                    print("Name: " + str(n) + "_" + album["title"])
+                    context = {"url"  : "http:" + ele.get('href'),
+                               "title": str(n) + "_" + album["title"],
+                               "date" : album["date"]}
+                    self.posts.append(context)
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -123,7 +164,7 @@ class Scraper:
                 self.failed_list.append(submission)
 
             file_path = os.path.join(download_folder,
-                                     re.sub(r'[\:/?"<>|()-=]',
+                                     re.sub(r'[\\/:*?"<>|]',
                                             '',
                                             submission["title"][:25]) + ".jpg")
             # Try to save the image to disk
