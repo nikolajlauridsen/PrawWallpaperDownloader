@@ -1,15 +1,23 @@
-# PrawWallpaperDownloader (Python3)
+# PrawPapers (Praw Wallpaper Downloader)
 
-Download a bunch of wallpapers from the hot sections of r/wallpapers (or specify your own subreddit!)
+Download a bunch of wallpapers from the hot sections of r/wallpapers
+
+And it doesn't even have to be wallpapers! PrawPapers will download images from any subreddit
 
 Going into a little more detail the script will:
 
 1. Query Reddit for an amount of posts (25 by default)
-2. Sift through the links finding direct image links and imgur posts
-3. It will check whether any of the links has been downloaded before, sorting out those who has 
-4. Download all the now sorted links
-5. Go through all downloaded images deleting any images less than 1280x720 (Enter configuration mode to change this)
+2. Sift through the reddit posts finding direct image links and imgur posts/albums
+3. Extract all image links from any imgur albums found and add them to the link pool
+4. It will check whether any of the links has been downloaded before, sorting out those who has 
+5. Download all the now sorted links
+6. Go through all downloaded images deleting any images less than 1280x720
 
+The configuration mode lets you tweak almost all settings to your desire, including but not limited to:
+* Default subreddit
+* Minimum image dimensions
+* Amound of posts to sift through
+* And more
 
 Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)
 
@@ -48,5 +56,6 @@ py prawpapers.py -s MinimalWallpaper -l 100 --log
 * --re or -r will try to re download every post previously downloaded
 * --nc or --noclean don't delete small images
 * --ns or --nosort skip sorting out previosuly downloaded images
+* --na or --noalbum skip imgur albums
 * --log save a log of posts skipped
 * --verbose or -v print skipped posts to console
