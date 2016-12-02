@@ -4,7 +4,7 @@ Class that handles database interaction
 import sqlite3 as lite
 
 
-class Db_handler():
+class DbHandler:
     """Handles Database interaction"""
 
     def __init__(self):

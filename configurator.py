@@ -1,7 +1,7 @@
 import configparser
 import os
 
-class Configurator():
+class Configurator:
 
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -12,12 +12,12 @@ class Configurator():
             self.config.read('config.ini')
 
     def create_default_config(self):
-        self.config['DEFAULT'] = {'MinWidth': '1280',
+        self.config['DEFAULT'] = {'MinWidth' : '1280',
                                   'MinHeight': '720',
-                                  'Sub': 'wallpapers',
-                                  'Limit': '25',
-                                  'Clean': 'yes',
-                                  'Sort': 'yes'}
+                                  'Sub'      : 'wallpapers',
+                                  'Limit'    : '25',
+                                  'Clean'    : 'yes',
+                                  'Sort'     : 'yes'}
         self.config['user'] = {}
         self.save_config()
 

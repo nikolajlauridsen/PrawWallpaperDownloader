@@ -1,4 +1,4 @@
-from db_handler import Db_handler
+from db_handler import DbHandler
 from configurator import Configurator
 
 import time
@@ -12,10 +12,11 @@ from PIL import Image
 configurator = Configurator()
 
 class Scraper:
-    """A class for scraping links on reddit, utilizes Db_handler.py"""
+    """A class for scraping links on reddit, utilizes DbHandler.py,
+    and configurator.py"""
 
     def __init__(self):
-        self.db = Db_handler()
+        self.db = DbHandler()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 0.9.0 by /u/Pusillus")
         self.succeeded = 0
         self.failed = 0
