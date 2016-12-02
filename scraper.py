@@ -84,7 +84,7 @@ class Scraper:
         self.n_posts = len(self.posts)
         # Sort out previously downloaded images
         if not self.args.nosort:
-            self.posts, self.skipped_list = self.db.check_links(self.posts)
+            self.posts, self.skipped_list = self.db.sort_links(self.posts)
             self.print_skipped()
 
     def print_skipped(self):

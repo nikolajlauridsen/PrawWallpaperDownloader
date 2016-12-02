@@ -12,6 +12,7 @@ class Configurator:
             self.config.read('config.ini')
 
     def create_default_config(self):
+        """Create a default config file in the current working directory"""
         self.config['DEFAULT'] = {'MinWidth' : '1280',
                                   'MinHeight': '720',
                                   'Sub'      : 'wallpapers',
@@ -22,9 +23,12 @@ class Configurator:
         self.save_config()
 
     def get_config(self):
+        """Return user instance of the config, items in default and not in user
+        will be carried into the user config object"""
         return self.config['user']
 
     def menu(self):
+        """Run the configurator menu allowing user to edit config"""
         print('Choose setting to change')
         print('\nConfig menu:')
         print('1) Minimum width: {}\n2) Minimum height: {}\n'

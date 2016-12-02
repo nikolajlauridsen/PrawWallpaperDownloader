@@ -13,8 +13,8 @@ class DbHandler:
         self.c.execute("CREATE TABLE IF NOT EXISTS downloads "
                        "(Date TEXT, Link TEXT PRIMARY KEY, Title TEXT)")
 
-    # Insert a link into the database
     def insert_link(self, submission):
+        """Insert a link into the database"""
         try:
             self.c.execute("INSERT INTO downloads VALUES (?,?,?)",
                           (submission["date"],
@@ -23,8 +23,8 @@ class DbHandler:
         except lite.IntegrityError:
             pass # Assume it's a filthy reposter and skip it
 
-    # Return all posts downloaded as a list of dictionaries
     def get_posts(self):
+        """Return all posts downloaded as a list of context dictionaries"""
         self.c.execute("SELECT * FROM downloads")
         entries = self.c.fetchall()
         posts = []
@@ -36,14 +36,14 @@ class DbHandler:
             posts.append(context)
         return posts
 
-    # Returns all links as a list
     def get_links(self):
+        """Return all links as a list"""
         self.c.execute("SELECT Link FROM downloads")
         links = self.c.fetchall()
         return links
 
-    # Removes all downloaded links from a list of links
-    def check_links(self, submissions):
+    def sort_links(self, submissions):
+        """Sort out all previously downloaded links from a list of links"""
         new_links = []
         old_links = []
         skipped_list = []
@@ -58,6 +58,6 @@ class DbHandler:
                 skipped_list.append(submission)
         return new_links, skipped_list
 
-    # Commit changes to the database
     def save_changes(self):
+        """Commit changes to the database"""
         self.conn.commit()
