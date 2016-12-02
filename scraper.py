@@ -14,7 +14,6 @@ configurator = Configurator()
 """
  TODO: CLEAN UP!
      : Maybe make a dedicated function for download errors
-     : Improve naming of album pictures
 """
 class Scraper:
     """A class for scraping links on reddit, utilizes DbHandler.py,
@@ -125,7 +124,8 @@ class Scraper:
             if len(link_elements) > 0:
                 for n, ele in enumerate(link_elements):
                     context = {"url"  : "http:" + ele.get('href'),
-                               "title": str(n) + "_" + album["title"],
+                               "title": album["title"],
+                               "id"   : n,
                                "date" : album["date"]}
                     self.posts.append(context)
         print() #Add missing newline from printing album nr
@@ -169,10 +169,18 @@ class Scraper:
                 format = '.png'
             else:
                 format = '.jpg'
-            file_path = os.path.join(download_folder,
-                                     re.sub(r'[\\/:*?"<>|]',
-                                            '',
-                                            submission["title"][:25]) + format)
+
+            if 'id' in submission:
+                file_path = os.path.join(download_folder,
+                                         re.sub(r'[\\/:*?"<>|]',
+                                                '',
+                                                submission["title"][
+                                                :25]) + '_' + str(submission['id']+1) + format)
+            else:
+                file_path = os.path.join(download_folder,
+                                         re.sub(r'[\\/:*?"<>|]',
+                                                '',
+                                                submission["title"][:25]) + format)
             # Try to save the image to disk
             try:
                 with open(file_path, 'wb') as image:
