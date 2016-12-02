@@ -13,7 +13,6 @@ from PIL import Image
 configurator = Configurator()
 """
  TODO: CLEAN UP!
-     : Save with proper format
      : Maybe make a dedicated function for download errors
      : Improve naming of album pictures
 """
@@ -166,10 +165,14 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(submission)
 
+            if submission["url"].endswith('.png'):
+                format = '.png'
+            else:
+                format = '.jpg'
             file_path = os.path.join(download_folder,
                                      re.sub(r'[\\/:*?"<>|]',
                                             '',
-                                            submission["title"][:25]) + ".jpg")
+                                            submission["title"][:25]) + format)
             # Try to save the image to disk
             try:
                 with open(file_path, 'wb') as image:
