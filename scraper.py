@@ -55,6 +55,8 @@ class Scraper:
                             action="store_true", default= not self.config.getboolean('Clean'))
         parser.add_argument('-ns', '--nosort', help="Skip sorting out previously downloaded images (Sorting: {})".format(self.config['sort']),
                             action="store_true", default= not self.config.getboolean('Sort'))
+        parser.add_argument('-na', '--noalbum', help='Skip imgur albums',
+                            action='store_true', default= not self.config.getboolean('Albums'))
         parser.add_argument('-con', '--configure', help="Change settings",
                             action='store_true', default=False)
         args = parser.parse_args()
@@ -88,7 +90,8 @@ class Scraper:
                                  "date": time.strftime("%d-%m-%Y %H:%M")}
                 albums.append(album_context)
         # Extract all image links from the imgur albums
-        self.handle_albums(albums)
+        if not self.args.noalbum:
+            self.handle_albums(albums)
         # Save amount of valid imagages
         self.n_posts = len(self.posts)
         # Sort out previously downloaded images
