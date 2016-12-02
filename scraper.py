@@ -15,6 +15,7 @@ configurator = Configurator()
  TODO: CLEAN UP!
      : Save with proper format
      : Maybe make a dedicated function for download errors
+     : Improve naming of album pictures
 """
 class Scraper:
     """A class for scraping links on reddit, utilizes DbHandler.py,
@@ -92,7 +93,6 @@ class Scraper:
                                  "date": time.strftime("%d-%m-%Y %H:%M")}
                 albums.append(album_context)
         # Extract all image links from the imgur albums
-        print("Handling albums.")
         self.handle_albums(albums)
         # Save amount of valid imagages
         self.n_posts = len(self.posts)
@@ -103,9 +103,10 @@ class Scraper:
 
     def handle_albums(self, albums):
         """Extract all links from a list of imgur albums"""
+        n_albums = len(albums)
 
         for _id, album in enumerate(albums):
-            print("Fetching:" + album["url"] + "\nID: " + str(_id))
+            print("\rHandling album: {}/{}".format(_id+1,n_albums), end='')
             res = requests.get(album["url"])
             try:
                 res.raise_for_status()
@@ -114,19 +115,21 @@ class Scraper:
                 self.failed += 1
                 self.failed_list.append(album)
                 if self.args.verbose:
-                    print('An album error occured: ' + str(exc))
+                    # \033[F should return cursor to last line
+                    # But this is not guranteed for all consoles
+                    # Maybe look into curse library
+                    print('\nAn album error occured: ' + str(exc), end='\033[F')
                 continue
 
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
             if len(link_elements) > 0:
                 for n, ele in enumerate(link_elements):
-                    print("Found element:" +ele.get('href'))
-                    print("Name: " + str(n) + "_" + album["title"])
                     context = {"url"  : "http:" + ele.get('href'),
                                "title": str(n) + "_" + album["title"],
                                "date" : album["date"]}
                     self.posts.append(context)
+        print() #Add missing newline from printing album nr
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -158,7 +161,7 @@ class Scraper:
             except Exception as exc:
                 if self.args.verbose:
                     print('And error occured when downloading image\n'
-                          'Callback: {}'.format(exc))
+                          'Callback: {}'.format(exc), end='\033[F')
                 self.callbacks.append(exc)
                 self.failed += 1
                 self.failed_list.append(submission)
@@ -178,7 +181,7 @@ class Scraper:
             except Exception as exc:
                 if self.args.verbose:
                     print('An error occured when saving the image\n'
-                          'Callback: {}'.format(exc))
+                          'Callback: {}'.format(exc), end='\033[F')
                 self.failed += 1
                 self.failed_list.append(submission)
                 self.callbacks.append(exc)
