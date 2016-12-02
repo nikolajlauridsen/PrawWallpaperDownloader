@@ -9,7 +9,7 @@ Going into a little more detail the script will:
 1. Query Reddit for an amount of posts (25 by default)
 2. Sift through the reddit posts finding direct image links and imgur posts/albums
 3. Extract all image links from any imgur albums found and add them to the link pool
-4. It will check whether any of the links has been downloaded before, sorting out those who has 
+4. Check whether any of the links has been downloaded before, sorting out those who has 
 5. Download all the now sorted links
 6. Go through all downloaded images deleting any images less than 1280x720
 
