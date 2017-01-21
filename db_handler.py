@@ -12,6 +12,8 @@ class DbHandler:
         self.c = self.conn.cursor()
         self.c.execute("CREATE TABLE IF NOT EXISTS downloads "
                        "(Date TEXT, Link TEXT PRIMARY KEY, Title TEXT)")
+        self.c.execute("CREATE TABLE IF NOT EXISTS albums "
+                       "(Link TEXT, Title TEXT)")
 
     def insert_link(self, submission):
         """Insert a link into the database"""
@@ -22,6 +24,12 @@ class DbHandler:
                            submission["title"]))
         except lite.IntegrityError:
             pass # Assume it's a filthy reposter and skip it
+
+    def insert_album(self, album):
+        """Insert an album into the database"""
+        self.c.execute("INSERT INTO albums VALUES (?,?)",
+                       (album["url"],
+                        album["title"]))
 
     def get_posts(self):
         """Return all posts downloaded as a list of context dictionaries"""
@@ -42,6 +50,11 @@ class DbHandler:
         links = self.c.fetchall()
         return links
 
+    def get_albums_links(self):
+        self.c.execute("SELECT Link FROM albums")
+        links = self.c.fetchall()
+        return links
+
     def sort_links(self, submissions):
         """Sort out all previously downloaded links from a list of links"""
         new_links = []
@@ -57,6 +70,20 @@ class DbHandler:
             else:
                 skipped_list.append(submission)
         return new_links, skipped_list
+
+    def sort_albums(self, albums):
+        sorted_links = []
+        old_links = []
+
+        for link in self.get_albums_links():
+            old_links.append(link[0])
+
+        for album in albums:
+            if album["url"] not in old_links:
+                sorted_links.append(album)
+            else:
+                pass
+        return sorted_links
 
     def save_changes(self):
         """Commit changes to the database"""

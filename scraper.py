@@ -23,6 +23,7 @@ class Scraper:
         self.failed = 0
         self.skipped = 0
         self.n_posts = 0
+        self.albums = 0
         self.posts = []
         self.downloaded_images = []
         self.failed_list = []
@@ -101,6 +102,7 @@ class Scraper:
 
     def handle_albums(self, albums):
         """Extract all links from a list of imgur albums"""
+        albums = self.db.sort_albums(albums)
         n_albums = len(albums)
 
         for _id, album in enumerate(albums):
@@ -124,6 +126,8 @@ class Scraper:
                                "id"   : a_id,
                                "date" : album["date"]}
                     self.posts.append(context)
+            self.db.insert_album(album)
+            self.albums += 1
         print() #Add missing newline from printing album nr
 
     def handle_error(self, err, post):
@@ -203,9 +207,10 @@ class Scraper:
         print()
         self.skipped = len(self.skipped_list)
         new_images = self.succeeded-len(self.deleted_images)
-        print('Posts downloaded: {}/{} \nSkipped: {}\n'
+        print('Albums: {}\nImages downloaded: {}/{} \nSkipped: {}\n'
               'Failed: {}\nDeleted: {}\n'
-              'New images: {}'.format(self.succeeded,
+              'New images: {}'.format(self.albums,
+                                      self.succeeded,
                                       self.n_posts,
                                       self.skipped,
                                       self.failed,
@@ -223,10 +228,12 @@ class Scraper:
         with open("log.txt", 'w') as log:
             # Introduction
             log.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
-            log.write("Succeeded: {}\nSkipped: {}\n"
-                     "Failed: {}\n\n".format(self.succeeded,
-                                             self.skipped,
-                                             self.failed))
+            log.write("Albums: {}\nSucceeded: {}\nSkipped: {}\n"
+                      "Deleted: {}\nFailed: {}\n\n".format(self.albums,
+                                                           self.succeeded,
+                                                           self.skipped,
+                                                           len(self.deleted_images),
+                                                           self.failed))
 
             # Skipped list
             if len(self.skipped_list) > 0:
@@ -258,6 +265,7 @@ class Scraper:
                 for image in self.deleted_images:
                     log.write("{} deleted due to size\n\n".format(image))
                 log.write('End deleted list'.center(50, '=') + '\n'*2)
+
             # Callbacks
             if len(self.callbacks) > 0:
                 log.write("Begin callbacks".center(40, '=') + '\n')
