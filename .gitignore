@@ -1,0 +1,8 @@
+Downloads/*
+Legacy/*
+.idea/*
+Multi-DL/*
+venv/*
+*.yml
+*.db
+*.pyc
