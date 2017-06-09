@@ -23,7 +23,9 @@ class DbHandler:
                            submission["url"],
                            submission["title"]))
         except lite.IntegrityError:
-            pass # Assume it's a filthy reposter and skip it
+            # Wil happend when running with nosort since the link
+            # is in the databse
+            pass
 
     def insert_album(self, album):
         """Insert an album into the database"""

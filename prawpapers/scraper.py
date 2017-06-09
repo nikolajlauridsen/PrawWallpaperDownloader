@@ -196,7 +196,6 @@ class Scraper:
                 with open(file_path, 'wb') as image:
                     for chunk in response.iter_content(4096):
                         image.write(chunk)
-                    image.close()
                 self.succeeded += 1
                 self.downloaded_images.append(file_path)
             except Exception as exc:
