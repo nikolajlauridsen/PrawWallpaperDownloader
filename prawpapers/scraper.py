@@ -74,10 +74,16 @@ class Scraper:
         print('Contacting reddit, please hold...')
         for submission in subreddit.get_hot(limit=self.args.limit):
             url = submission.url
+            # Check for author
+            if not submission.author:
+                author = '[User Deleted]'
+            else:
+                author = str(submission.author)
+
             if url.endswith(".jpg"):
                 context = {"url": url,
                            "title": submission.title,
-                           "date": time.strftime("%d-%m-%Y %H:%M")}
+                           "author": author}
                 self.posts.append(context)
 
             # Imgur support
@@ -88,13 +94,15 @@ class Scraper:
                 link = "http://i.imgur.com/" + id + ".jpg"
                 context = {"url": link,
                            "title": submission.title,
-                           "date": time.strftime("%d-%m-%Y %H:%M")}
+                           "author": author}
                 self.posts.append(context)
+            # Album support
             elif ("imgur.com" in url) and ("/a/" in url):
                 album_context = {"url"  : url,
                                  "title": submission.title,
-                                 "date": time.strftime("%d-%m-%Y %H:%M")}
+                                 "author": author}
                 albums.append(album_context)
+
         # Extract all image links from the imgur albums
         if not self.args.noalbum:
             self.handle_albums(albums)
@@ -129,7 +137,7 @@ class Scraper:
                     context = {"url"  : "http:" + ele.get('href'),
                                "title": album["title"],
                                "id"   : a_id,
-                               "date" : album["date"]}
+                               "author": album["author"]}
                     self.posts.append(context)
             self.db.insert_album(album)
             self.albums += 1
