@@ -302,9 +302,9 @@ class Scraper:
                 image.close()
                 try:
                     os.remove(image_path)
+                    self.deleted_images.append(image_path)
                 except PermissionError:
                     print('\nCan\'t delete ' + image_path + ' image is currently in use')
-                self.deleted_images.append(image_path)
             else:
                 image.close()
 
