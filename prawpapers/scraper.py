@@ -20,17 +20,20 @@ class Scraper:
     def __init__(self):
         self.db = DbHandler()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 0.9.0 by /u/Pusillus")
+
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
         self.n_posts = 0
         self.albums = 0
+
         self.posts = []
         self.downloaded_images = []
         self.failed_list = []
         self.callbacks = []
         self.skipped_list = []
         self.deleted_images = []
+
         self.config = configurator.get_config()
         self.args = self.parse_arguments()
 

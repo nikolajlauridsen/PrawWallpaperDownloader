@@ -1,4 +1,5 @@
 import configparser
+import sys
 import os
 
 class Configurator:
@@ -27,6 +28,20 @@ class Configurator:
         """Return user instance of the config, items in default and not in user
         will be carried into the user config object"""
         return self.config['user']
+
+    @staticmethod
+    def prompt_boolean(message):
+        """
+        Prompt the user for a boolean to be saved in config.ini, exits the 
+        script if the user inputs an invalid value
+        :param message: Message to be displayed
+        :return: string boolean for .ini files
+        """
+        u_input = input(message + " yes/no: ").strip().lower()
+        if u_input == "yes" or u_input == "no":
+            return u_input
+        else:
+            sys.exit("Invalid input")
 
     def menu(self):
         """Run the configurator menu allowing user to edit config"""
@@ -58,13 +73,13 @@ class Configurator:
             self.config['user']['Sub'] = input('New default subreddit: ')
             self.save_config()
         elif u_input == '5':
-            self.config['user']['Clean'] = input('Clean yes/no: ')
+            self.config['user']['Clean'] = self.prompt_boolean("Clean")
             self.save_config()
         elif u_input == '6':
-            self.config['user']['Sort'] = input('Sort yes/no: ')
+            self.config['user']['Sort'] = self.prompt_boolean("Sort")
             self.save_config()
         elif u_input == '7':
-            self.config['user']['Albums'] = input('Download albums yes/no: ')
+            self.config['user']['Albums'] = self.prompt_boolean("Download albums")
             self.save_config()
         elif u_input == '8':
             self.reset_config()
