@@ -49,22 +49,17 @@ class DbHandler:
     def get_links(self):
         """Return all links as a list"""
         self.c.execute("SELECT Link FROM downloads")
-        links = self.c.fetchall()
-        return links
+        return [link[0] for link in self.c.fetchall()]
 
     def get_albums_links(self):
         self.c.execute("SELECT Link FROM albums")
-        links = self.c.fetchall()
-        return links
+        return [link[0] for link in self.c.fetchall()]
 
     def sort_links(self, submissions):
         """Sort out all previously downloaded links from a list of links"""
         new_links = []
-        old_links = []
+        old_links = self.get_links()
         skipped_list = []
-
-        for link in self.get_links():
-            old_links.append(link[0])
 
         for submission in submissions:
             if submission["url"] not in old_links:
@@ -75,10 +70,7 @@ class DbHandler:
 
     def sort_albums(self, albums):
         sorted_links = []
-        old_links = []
-
-        for link in self.get_albums_links():
-            old_links.append(link[0])
+        old_links = self.get_albums_links()
 
         for album in albums:
             if album["url"] not in old_links:
