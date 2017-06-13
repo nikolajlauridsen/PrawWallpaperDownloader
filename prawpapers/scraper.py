@@ -130,12 +130,15 @@ class Scraper:
                 self.handle_error(exc, album)
                 continue
 
-            # Insert link to get id
-            album_id = self.db.insert_album(album)
 
             # Parse through the html fetching all link elements
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
+
+            # Insert link to get id
+            album['length'] = len(link_elements)
+            album_id = self.db.insert_album(album)
+
             if len(link_elements) > 0:
                 for a_id, ele in enumerate(link_elements):
                     # Put the data in context for later

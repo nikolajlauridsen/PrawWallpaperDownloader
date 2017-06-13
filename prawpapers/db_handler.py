@@ -42,12 +42,13 @@ class DbHandler:
          "title": "post title"}
         :param album: Dictionary
         """
-        self.c.execute("INSERT INTO albums VALUES (?, ?, ?, ?, ?)",
+        self.c.execute("INSERT INTO albums VALUES (?, ?, ?, ?, ?, ?)",
                        (None,
                         int(time.time()),
                         album["url"],
                         album["title"],
-                        album["author"]))
+                        album["author"],
+                        album["length"]))
         self.c.execute("SELECT last_insert_rowid()")
         return int(self.c.fetchone()[0])
 
