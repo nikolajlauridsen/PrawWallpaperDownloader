@@ -7,9 +7,9 @@ venv/*
 *.db
 *.pyc
 .cache
-*.txt
 *.ini
 configtester.py
 test.py
 *.xlsx
+env/
 ProjectReport.*
