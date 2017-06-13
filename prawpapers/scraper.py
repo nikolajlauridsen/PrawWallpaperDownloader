@@ -3,6 +3,7 @@ from configurator import Configurator
 
 import time
 import os
+import sys
 import requests
 import bs4
 import re
@@ -316,7 +317,12 @@ class Scraper:
             print('Getting posts from: ' + self.args.subreddit)
             self.get_posts(self.r.get_subreddit(self.args.subreddit))
         except praw.errors.InvalidSubreddit:
-            print("It appears like you mis typed the subreddit name")
+            sys.exit("It appears like you mis typed the subreddit name")
+        except praw.errors.Forbidden:
+            sys.exit("Access to subreddit denied")
+        except praw.errors.NotFound:
+            sys.exit("Subreddit not found")
+
         self.download_images()
         self.save_posts()
         if len(self.downloaded_images) > 0 and not self.args.noclean:
