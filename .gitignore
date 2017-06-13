@@ -6,3 +6,10 @@ venv/*
 *.yml
 *.db
 *.pyc
+.cache
+*.txt
+*.ini
+configtester.py
+test.py
+*.xlsx
+ProjectReport.*
