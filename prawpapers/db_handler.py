@@ -56,7 +56,7 @@ class DbHandler:
         self.c.execute("SELECT last_insert_rowid()")
         return int(self.c.fetchone()[0])
 
-    def get_posts(self):
+    def get_posts(self, age_limit=None):
         """
         Return all posts downloaded as a list of context dictionaries
         in the format:
@@ -66,8 +66,14 @@ class DbHandler:
          "title": "title of the post"}
         :return: List of dictionaries
         """
-        self.c.execute("SELECT * FROM downloads")
+        if not age_limit:
+            self.c.execute("SELECT * FROM downloads")
+        else:
+            self.c.execute("SELECT Link FROM downloads WHERE "
+                           "DATETIME(Download_date, 'unixepoch') >= "
+                           "DATE('now', '-{} days')".format(age_limit))
         entries = self.c.fetchall()
+
         posts = []
 
         for entry in entries:
@@ -80,13 +86,19 @@ class DbHandler:
             posts.append(context)
         return posts
 
-    def get_links(self):
+    def get_links(self, age_limit=None):
         """
         Return all links in the database
         :return: list of image links
         """
-        self.c.execute("SELECT Link FROM downloads")
-        return [link[0] for link in self.c.fetchall()]
+        if not age_limit:
+            self.c.execute("SELECT Link FROM downloads")
+        else:
+            self.c.execute("SELECT Link FROM downloads WHERE "
+                           "DATETIME(Download_date, 'unixepoch') >= "
+                           "DATE('now', '-{} days')".format(age_limit))
+        response = self.c.fetchall()
+        return [link[0] for link in response]
 
     def get_albums_links(self):
         """
@@ -96,15 +108,16 @@ class DbHandler:
         self.c.execute("SELECT Link FROM albums")
         return [link[0] for link in self.c.fetchall()]
 
-    def sort_links(self, submissions):
+    def sort_links(self, submissions, age_limit=None):
         """
         Sort out all previously downloaded links from a list of submissions
         :param submissions: list of links to be sorted
+        :param age_limit: kwarg to determine max age of links to consider
         :return: list of sorted submissions, 
         and a list of discarded submissions
         """
         new_links = []
-        old_links = self.get_links()
+        old_links = self.get_links(age_limit=age_limit)
         skipped_list = []
 
         for submission in submissions:

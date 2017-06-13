@@ -14,13 +14,14 @@ class Configurator:
 
     def create_default_config(self):
         """Create a default config file in the current working directory"""
-        self.config['DEFAULT'] = {'MinWidth' : '1280',
-                                  'MinHeight': '720',
-                                  'Sub'      : 'wallpapers',
-                                  'Limit'    : '25',
-                                  'Clean'    : 'yes',
-                                  'Sort'     : 'yes',
-                                  'Albums'   : 'yes'}
+        self.config['DEFAULT'] = {'MinWidth'   : '1280',
+                                  'MinHeight'  : '720',
+                                  'Sub'        : 'wallpapers',
+                                  'Limit'      : '25',
+                                  'Clean'      : 'yes',
+                                  'Sort'       : 'yes',
+                                  'MaxAge'     : 'none',
+                                  'Albums'     : 'yes'}
         self.config['user'] = {}
         self.save_config()
 
@@ -49,14 +50,15 @@ class Configurator:
         print('\nConfig menu:')
         print('1) Minimum width: {}\n2) Minimum height: {}\n'
               '3) Post limit: {}\n4) Default subreddit: {}\n'
-              '5) Clean: {}\n6) Sort: {}\n7) Download albums: {}'
-              '\n8) Reset to default\n9) Exit'
+              '5) Clean: {}\n6) Sort: {}\n7) Max Age: {}\n'
+              '8) Download albums: {}\n9) Reset to default\n10) Exit'
               .format(self.config['user']['MinWidth'],
                       self.config['user']['MinHeight'],
                       self.config['user']['Limit'],
                       self.config['user']['Sub'],
                       self.config['user']['Clean'],
                       self.config['user']['Sort'],
+                      self.config['user']['MaxAge'],
                       self.config['user']['Albums']))
 
         u_input = input('Menu: ')
@@ -79,11 +81,14 @@ class Configurator:
             self.config['user']['Sort'] = self.prompt_boolean("Sort")
             self.save_config()
         elif u_input == '7':
-            self.config['user']['Albums'] = self.prompt_boolean("Download albums")
+            self.config['user']['MaxAge'] = input('New max age: ')
             self.save_config()
         elif u_input == '8':
-            self.reset_config()
+            self.config['user']['Albums'] = self.prompt_boolean("Download albums")
+            self.save_config()
         elif u_input == '9':
+            self.reset_config()
+        elif u_input == '10':
             self.save_config()
         else:
             print('Invalid input')
