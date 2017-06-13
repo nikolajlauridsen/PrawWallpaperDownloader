@@ -23,12 +23,13 @@ class DbHandler:
         :param submission: dict in the above format
         """
         try:
-            self.c.execute("INSERT INTO downloads VALUES (?, ?, ?, ?, ?)",
+            self.c.execute("INSERT INTO downloads VALUES (?, ?, ?, ?, ?, ?)",
                           (None,
                            int(time.time()),
                            submission["url"],
                            submission["title"],
-                           submission["author"]))
+                           submission["author"],
+                           submission["parent_id"]))
         except lite.IntegrityError:
             # Will happen when running with nosort since the link
             # is already in the database
@@ -47,6 +48,8 @@ class DbHandler:
                         album["url"],
                         album["title"],
                         album["author"]))
+        self.c.execute("SELECT last_insert_rowid()")
+        return int(self.c.fetchone()[0])
 
     def get_posts(self):
         """

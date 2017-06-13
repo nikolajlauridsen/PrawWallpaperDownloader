@@ -83,7 +83,8 @@ class Scraper:
             if url.endswith(".jpg"):
                 context = {"url": url,
                            "title": submission.title,
-                           "author": author}
+                           "author": author,
+                           "parent_id": None}
                 self.posts.append(context)
 
             # Imgur support
@@ -94,7 +95,8 @@ class Scraper:
                 link = "http://i.imgur.com/" + id + ".jpg"
                 context = {"url": link,
                            "title": submission.title,
-                           "author": author}
+                           "author": author,
+                           "parent_id": None}
                 self.posts.append(context)
             # Album support
             elif ("imgur.com" in url) and ("/a/" in url):
@@ -128,6 +130,9 @@ class Scraper:
                 self.handle_error(exc, album)
                 continue
 
+            # Insert link to get id
+            album_id = self.db.insert_album(album)
+
             # Parse through the html fetching all link elements
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
@@ -136,10 +141,10 @@ class Scraper:
                     # Put the data in context for later
                     context = {"url"  : "http:" + ele.get('href'),
                                "title": album["title"],
+                               "parent_id": album_id,
                                "id"   : a_id,
                                "author": album["author"]}
                     self.posts.append(context)
-            self.db.insert_album(album)
             self.albums += 1
         print() #Add missing newline from printing album nr
 
