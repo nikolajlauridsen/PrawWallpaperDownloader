@@ -20,7 +20,7 @@ class Scraper:
 
     def __init__(self):
         self.db = DbHandler()
-        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 0.9.0 by /u/Pusillus")
+        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus")
 
         self.succeeded = 0
         self.failed = 0
