@@ -12,6 +12,7 @@ from PIL import Image
 
 configurator = Configurator()
 
+
 class Scraper:
     """A class for scraping links on reddit, utilizes DbHandler.py,
     and configurator.py"""
@@ -162,11 +163,10 @@ class Scraper:
         for l_id, submission in enumerate(self.posts):
             print('\r Downloading image {}/{}'
                   .format(l_id+1, len(self.posts)), flush=True, end='')
-            # Send requests
-            response = requests.get(submission["url"])
 
             # Try to download image
             try:
+                response = requests.get(submission["url"])
                 response.raise_for_status()
             except Exception as exc:
                 self.handle_error(exc, submission)
@@ -174,23 +174,25 @@ class Scraper:
             # Try to determine if it's a .png, fall back to .jpg if not
             # Most modern operating systems will open the file regardless
             # of format suffix
-            if submission["url"].endswith('.png'):
-                format = '.png'
+            content_type = response.headers['Content-Type'].split('/')[1]
+            if  content_type == 'jpeg':
+                image_format = '.jpg'
             else:
-                format = '.jpg'
+                image_format = '.' + content_type
+
             # If there's an id key in the submission it's from an album and
             # should be suffixed with it's position within that album
             if 'id' in submission:
                 file_path = os.path.join(download_folder,
                                          re.sub(r'[\\/:*?"<>|]',
                                                 '',
-                                                submission["title"][
-                                                :25]) + '_' + str(submission['id']+1) + format)
+                                                submission["title"][:25
+                                                ]) + '_' + str(submission['id']+1) + image_format)
             else:
                 file_path = os.path.join(download_folder,
                                          re.sub(r'[\\/:*?"<>|]',
                                                 '',
-                                                submission["title"][:25]) + format)
+                                                submission["title"][:25]) + image_format)
             # Try to save the image to disk
             try:
                 with open(file_path, 'wb') as image:
