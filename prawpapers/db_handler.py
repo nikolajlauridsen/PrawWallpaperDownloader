@@ -69,7 +69,7 @@ class DbHandler:
         if not age_limit:
             self.c.execute("SELECT * FROM downloads")
         else:
-            self.c.execute("SELECT Link FROM downloads WHERE "
+            self.c.execute("SELECT * FROM downloads WHERE "
                            "DATETIME(Download_date, 'unixepoch') >= "
                            "DATE('now', '-{} days')".format(age_limit))
         entries = self.c.fetchall()
