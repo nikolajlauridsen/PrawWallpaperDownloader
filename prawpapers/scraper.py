@@ -238,7 +238,7 @@ class Scraper:
 
     def save_log(self):
         """Build log file"""
-        with open("log.txt", 'w') as log:
+        with open("log.txt", 'w', encoding="utf-8") as log:
             # Introduction
             log.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
             log.write("Albums: {}\nSucceeded: {}\nSkipped: {}\n"
@@ -247,18 +247,6 @@ class Scraper:
                                                            self.skipped,
                                                            len(self.deleted_images),
                                                            self.failed))
-
-            # Skipped list
-            if len(self.skipped_list) > 0:
-                log.write("Begin skipped list".center(40, '=') + '\n')
-                for post in self.skipped_list:
-                    try:
-                        log.write("{}\n{}\n"
-                                 "\n".format(post["title"],
-                                             post["url"]))
-                    except UnicodeEncodeError:
-                        pass
-                log.write("End skipped list".center(40, '=') + '\n'*2)
 
             # Failed list
             if len(self.failed_list) > 0:
@@ -272,13 +260,6 @@ class Scraper:
                         pass
                 log.write("End failed list".center(40, '=') + '\n'*2)
 
-            # Deleted list
-            if len(self.deleted_images) > 0:
-                log.write('Begin deleted list'.center(40, '=') + '\n'*2)
-                for image in self.deleted_images:
-                    log.write("{} deleted due to size\n\n".format(image))
-                log.write('End deleted list'.center(50, '=') + '\n'*2)
-
             # Callbacks
             if len(self.callbacks) > 0:
                 log.write("Begin callbacks".center(40, '=') + '\n')
@@ -287,7 +268,28 @@ class Scraper:
                     log.write('\n'*2)
                 log.write('End callbacks'.center(40, '=') + '\n'*2)
 
-            log.close()
+            # Skipped list
+            if len(self.skipped_list) > 0:
+                log.write("Begin skipped list".center(40, '=') + '\n')
+                for post in self.skipped_list:
+                    try:
+                        log.write("{}\n{}\n"
+                                 "\n".format(post["title"],
+                                             post["url"]))
+                    except UnicodeEncodeError:
+                        pass
+                log.write("End skipped list".center(40, '=') + '\n'*2)
+
+            # Deleted list
+            if len(self.deleted_images) > 0:
+                log.write('Begin deleted list'.center(40, '=') + '\n'*2)
+                for image in self.deleted_images:
+                    try:
+                        log.write("{} deleted due to size\n\n".format(image))
+                    except UnicodeEncodeError:
+                        pass
+                log.write('End deleted list'.center(50, '=') + '\n'*2)
+
 
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
