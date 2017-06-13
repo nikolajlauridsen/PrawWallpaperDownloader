@@ -175,10 +175,18 @@ class Scraper:
             except Exception as exc:
                 self.handle_error(exc, submission)
 
-            # Try to determine if it's a .png, fall back to .jpg if not
+            # Try to determine file format from headers fall back to trying to
+            # determine it from url if content-type is missing.
             # Most modern operating systems will open the file regardless
             # of format suffix
-            content_type = response.headers['Content-Type'].split('/')[1]
+            try:
+                content_type = response.headers['Content-Type'].split('/')[1]
+            except KeyError:
+                if submission["url"].endswith('.png'):
+                    content_type = "png"
+                else:
+                    content_type = "jpg"
+
             if  content_type == 'jpeg':
                 image_format = '.jpg'
             else:
