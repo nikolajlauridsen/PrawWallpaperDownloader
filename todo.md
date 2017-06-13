@@ -7,3 +7,4 @@
 4. ~~Improve database querying, no reason to pull links that are months old (allow user to specify this in settings)~~
 5. Look into making the http requests concurrent to improve speed
 6. Improve config handling, it's a mess atm, more specifically parse input properly, a user can easily fuck up their config
+7. Allow users to specify section (hot, new, top, etc)
