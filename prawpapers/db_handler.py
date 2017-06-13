@@ -2,6 +2,7 @@
 Class that handles database interaction
 """
 import sqlite3 as lite
+import time
 
 
 class DbHandler:
@@ -10,24 +11,27 @@ class DbHandler:
     def __init__(self):
         self.conn = lite.connect('wallpaper_base.db')
         self.c = self.conn.cursor()
-        self.c.execute("CREATE TABLE IF NOT EXISTS downloads "
-                       "(Date TEXT, Link TEXT PRIMARY KEY, Title TEXT)")
-        self.c.execute("CREATE TABLE IF NOT EXISTS albums "
-                       "(Link TEXT, Title TEXT)")
+        for qry in open('schema.sql', 'r').readlines():
+            self.c.execute(qry)
 
     def insert_link(self, submission):
         """
         Insert a submission into the database takes a dict with:
-        {"date": "date string",
-         "url": "link-to-image"
-         "title": "title of the post"}
+        {"url": "link-to-image",
+         "title": "title of the post",
+         "author": "author name",
+         "parent_id": INT if it's from an album this will be it's ID in the 
+         database, otherwise this should be None}
         :param submission: dict in the above format
         """
         try:
-            self.c.execute("INSERT INTO downloads VALUES (?,?,?)",
-                          (submission["date"],
+            self.c.execute("INSERT INTO downloads VALUES (?, ?, ?, ?, ?, ?)",
+                          (None,
+                           int(time.time()),
                            submission["url"],
-                           submission["title"]))
+                           submission["title"],
+                           submission["author"],
+                           submission["parent_id"]))
         except lite.IntegrityError:
             # Will happen when running with nosort since the link
             # is already in the database
@@ -37,18 +41,27 @@ class DbHandler:
         """
         Insert an album into the database, requires a dictionary with:
         {"url": "link-to-imgur-album",
-         "title": "post title"}
+         "title": "post title",
+         "author": "author name",
+         "length": INT amount of posts}
         :param album: Dictionary
         """
-        self.c.execute("INSERT INTO albums VALUES (?,?)",
-                       (album["url"],
-                        album["title"]))
+        self.c.execute("INSERT INTO albums VALUES (?, ?, ?, ?, ?, ?)",
+                       (None,
+                        int(time.time()),
+                        album["url"],
+                        album["title"],
+                        album["author"],
+                        album["length"]))
+        self.c.execute("SELECT last_insert_rowid()")
+        return int(self.c.fetchone()[0])
 
     def get_posts(self):
         """
         Return all posts downloaded as a list of context dictionaries
         in the format:
-        {"date": "date string",
+        {"id": INT id,)
+         "date": INT unix time stamp,
          "url": "link-to-image"
          "title": "title of the post"}
         :return: List of dictionaries
@@ -58,9 +71,12 @@ class DbHandler:
         posts = []
 
         for entry in entries:
-            context = {"date": entry[0],
-                       "url": entry[1],
-                       "title": entry[2]}
+            context = {"id": entry[0],
+                       "date": entry[1],
+                       "url": entry[2],
+                       "title": entry[3],
+                       "author": entry[4],
+                       "parent_id": entry[5]}
             posts.append(context)
         return posts
 
