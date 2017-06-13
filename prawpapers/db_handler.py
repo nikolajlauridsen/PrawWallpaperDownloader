@@ -17,9 +17,11 @@ class DbHandler:
     def insert_link(self, submission):
         """
         Insert a submission into the database takes a dict with:
-        {"date": "date string",
-         "url": "link-to-image"
-         "title": "title of the post"}
+        {"url": "link-to-image",
+         "title": "title of the post",
+         "author": "author name",
+         "parent_id": INT if it's from an album this will be it's ID in the 
+         database, otherwise this should be None}
         :param submission: dict in the above format
         """
         try:
@@ -39,7 +41,9 @@ class DbHandler:
         """
         Insert an album into the database, requires a dictionary with:
         {"url": "link-to-imgur-album",
-         "title": "post title"}
+         "title": "post title",
+         "author": "author name",
+         "length": INT amount of posts}
         :param album: Dictionary
         """
         self.c.execute("INSERT INTO albums VALUES (?, ?, ?, ?, ?, ?)",
@@ -70,7 +74,9 @@ class DbHandler:
             context = {"id": entry[0],
                        "date": entry[1],
                        "url": entry[2],
-                       "title": entry[3]}
+                       "title": entry[3],
+                       "author": entry[4],
+                       "parent_id": entry[5]}
             posts.append(context)
         return posts
 
