@@ -177,7 +177,8 @@ class Scraper:
             print('End list'.center(40, '='), '\n')
 
     def download_images(self):
-        """Create folders and try to download/save the image links in self.posts"""
+        """Create folders and try to download/save the image links
+         in self.posts, assumes all links are image links"""
         # Make folders
         os.makedirs("Downloads", exist_ok=True)
         download_folder = os.path.join("Downloads", self.args.subreddit)
@@ -199,13 +200,24 @@ class Scraper:
             # Most modern operating systems will open the file regardless
             # of format suffix
             try:
-                content_type = response.headers['Content-Type'].split('/')[1]
-            except KeyError:
+                type_header = response.headers['Content-Type'].split('/')
+                if type_header[0] == 'image':
+                    content_type = type_header[1]
+                else:
+                    # Sometimes the content-type is incorrect
+                    # try to guess it from URL
+                    if submission["url"].endswith('.png'):
+                        content_type = "png"
+                    else:
+                        content_type = "jpg"
+            except KeyError and IndexError:
+                # Missing content-type header, guess from link
                 if submission["url"].endswith('.png'):
                     content_type = "png"
                 else:
                     content_type = "jpg"
 
+            # content-headers describe .jpg images with jpeg
             if  content_type == 'jpeg':
                 image_format = '.jpg'
             else:
