@@ -282,7 +282,11 @@ class Scraper:
         self.notify = True
         threading.Thread(target=self.update_screen).start()
         for thread in threads:
-            thread.join()
+            try:
+                thread.join()
+            except KeyboardInterrupt:
+                # Don't know how to handle this, ideas?
+                pass
         self.notify = False
 
 
