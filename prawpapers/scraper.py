@@ -3,6 +3,8 @@ from configurator import Configurator
 
 import time
 import os
+import queue
+import threading
 import sys
 import requests
 import bs4
@@ -28,7 +30,10 @@ class Scraper:
         self.n_posts = 0
         self.albums = 0
 
+        self.notify = False
+
         self.posts = []
+        self.que = queue.Queue()
         self.downloaded_images = []
         self.failed_list = []
         self.callbacks = []
@@ -63,6 +68,8 @@ class Scraper:
                             action="store_true", default= not self.config.getboolean('Sort'))
         parser.add_argument('-na', '--noalbum', help='Skip imgur albums',
                             action='store_true', default= not self.config.getboolean('Albums'))
+        parser.add_argument('-t', '--threads', help='Amount of threads for downloading images',
+                            default=int(self.config['Threads']), type=int)
         parser.add_argument('-con', '--configure', help="Change settings",
                             action='store_true', default=False)
         args = parser.parse_args()
@@ -176,21 +183,16 @@ class Scraper:
                     print(post["url"] + " has already been downloaded... skipping")
             print('End list'.center(40, '='), '\n')
 
-    def download_images(self):
-        """Create folders and try to download/save the image links
-         in self.posts, assumes all links are image links"""
-        # Make folders
-        os.makedirs("Downloads", exist_ok=True)
-        download_folder = os.path.join("Downloads", self.args.subreddit)
-        os.makedirs(download_folder, exist_ok=True)
-
-        for l_id, submission in enumerate(self.posts):
-            print('\r Downloading image {}/{}'
-                  .format(l_id+1, len(self.posts)), flush=True, end='')
+    def grab_image(self, download_folder):
+        while True:
+            try:
+                submission = self.que.get(block=False)
+            except queue.Empty:
+                return
 
             # Try to download image
             try:
-                response = requests.get(submission["url"])
+                response = requests.get(submission["url"], timeout=10)
                 response.raise_for_status()
             except Exception as exc:
                 self.handle_error(exc, submission)
@@ -245,6 +247,48 @@ class Scraper:
                 self.downloaded_images.append(file_path)
             except Exception as exc:
                 self.handle_error(exc, submission)
+
+    def update_screen(self):
+        while self.notify:
+            handled_images = self.succeeded + self.failed
+            print("Downloading images {}/{}".format(handled_images,len(self.posts)),
+                  flush=True, end='\r')
+            time.sleep(0.5)
+
+    def download_images(self):
+        """Create folders and try to download/save the image links
+         in self.posts, assumes all links are image links"""
+        # Stop if there's not posts to download
+        if len(self.posts) < 1:
+            print("No new images to download.")
+            return
+
+        # Make folders
+        os.makedirs("Downloads", exist_ok=True)
+        download_folder = os.path.join("Downloads", self.args.subreddit)
+        os.makedirs(download_folder, exist_ok=True)
+
+        for post in self.posts:
+            self.que.put(post)
+
+        threads = []
+        print("Starting {} threads".format(self.args.threads))
+        for n in range(self.args.threads):
+            thread = threading.Thread(target=self.grab_image,
+                                      args=(download_folder, ))
+            thread.start()
+            threads.append(thread)
+
+        self.notify = True
+        threading.Thread(target=self.update_screen).start()
+        for thread in threads:
+            try:
+                thread.join()
+            except KeyboardInterrupt:
+                # Don't know how to handle this, ideas?
+                pass
+        self.notify = False
+
 
     def print_stats(self):
         """Print download stats to console"""
