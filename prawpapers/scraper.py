@@ -190,7 +190,7 @@ class Scraper:
 
             # Try to download image
             try:
-                response = requests.get(submission["url"])
+                response = requests.get(submission["url"], timeout=10)
                 response.raise_for_status()
             except Exception as exc:
                 self.handle_error(exc, submission)
