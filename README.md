@@ -53,6 +53,7 @@ py prawpapers -s MinimalWallpaper -l 100 --log
 * -con or --config enter configuration mode
 * --subreddit \<subreddit> or -s \<subreddit> specify which subreddit to download images from, omit the /r/ (default is wallpapers)
 * --limit \<number> or -l \<number> specify how many posts to search as a whole number (default is 25)
+* --threads \<number> or -t \<number> specify how many download threads to spawn
 * --re or -r will try to re download every post previously downloaded
 * --nc or --noclean don't delete small images
 * --ns or --nosort skip sorting out previosuly downloaded images
