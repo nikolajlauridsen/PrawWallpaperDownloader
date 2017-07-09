@@ -21,7 +21,8 @@ class Configurator:
                                   'Clean'      : 'yes',
                                   'Sort'       : 'yes',
                                   'MaxAge'     : 'none',
-                                  'Albums'     : 'yes'}
+                                  'Albums'     : 'yes',
+                                  'Threads'    : '10'}
         self.config['user'] = {}
         self.save_config()
 
@@ -51,7 +52,8 @@ class Configurator:
         print('1) Minimum width: {}\n2) Minimum height: {}\n'
               '3) Post limit: {}\n4) Default subreddit: {}\n'
               '5) Clean: {}\n6) Sort: {}\n7) Max Age: {}\n'
-              '8) Download albums: {}\n9) Reset to default\n10) Exit'
+              '8) Download albums: {}\n9) Threads: {}\n'
+              '10) Reset to default\n11) Exit'
               .format(self.config['user']['MinWidth'],
                       self.config['user']['MinHeight'],
                       self.config['user']['Limit'],
@@ -59,7 +61,8 @@ class Configurator:
                       self.config['user']['Clean'],
                       self.config['user']['Sort'],
                       self.config['user']['MaxAge'],
-                      self.config['user']['Albums']))
+                      self.config['user']['Albums'],
+                      self.config['user']['Threads']))
 
         u_input = input('Menu: ')
         if u_input == '1':
@@ -87,8 +90,11 @@ class Configurator:
             self.config['user']['Albums'] = self.prompt_boolean("Download albums")
             self.save_config()
         elif u_input == '9':
-            self.reset_config()
+            self.config['user']['Threads'] = input('New thread count: ')
+            self.save_config()
         elif u_input == '10':
+            self.reset_config()
+        elif u_input == '11':
             self.save_config()
         else:
             print('Invalid input')

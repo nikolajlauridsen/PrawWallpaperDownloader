@@ -68,6 +68,8 @@ class Scraper:
                             action="store_true", default= not self.config.getboolean('Sort'))
         parser.add_argument('-na', '--noalbum', help='Skip imgur albums',
                             action='store_true', default= not self.config.getboolean('Albums'))
+        parser.add_argument('-t', '--threads', help='Amount of threads for downloading images',
+                            default=int(self.config['Threads']), type=int)
         parser.add_argument('-con', '--configure', help="Change settings",
                             action='store_true', default=False)
         args = parser.parse_args()
@@ -269,10 +271,9 @@ class Scraper:
         for post in self.posts:
             self.que.put(post)
 
-        thread_count = 10
         threads = []
-        print("Starting {} threads".format(thread_count))
-        for n in range(thread_count):
+        print("Starting {} threads".format(self.args.threads))
+        for n in range(self.args.threads):
             thread = threading.Thread(target=self.grab_image,
                                       args=(download_folder, ))
             thread.start()
