@@ -30,7 +30,7 @@ class Scraper:
         self.n_posts = 0
         self.albums = 0
 
-        self.notiy = False
+        self.notify = False
 
         self.posts = []
         self.que = queue.Queue()
