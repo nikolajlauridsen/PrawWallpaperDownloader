@@ -256,6 +256,11 @@ class Scraper:
     def download_images(self):
         """Create folders and try to download/save the image links
          in self.posts, assumes all links are image links"""
+        # Stop if there's not posts to download
+        if len(self.posts) < 1:
+            print("No new images to download.")
+            return
+
         # Make folders
         os.makedirs("Downloads", exist_ok=True)
         download_folder = os.path.join("Downloads", self.args.subreddit)
@@ -272,6 +277,7 @@ class Scraper:
                                       args=(download_folder, ))
             thread.start()
             threads.append(thread)
+
         self.notify = True
         threading.Thread(target=self.update_screen).start()
         for thread in threads:
