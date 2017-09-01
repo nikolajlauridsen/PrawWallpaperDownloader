@@ -1,6 +1,8 @@
 from db_handler import DbHandler
 from configurator import Configurator
 
+from PyCLIBar.CLIBar import CLIBar
+
 import time
 import os
 import queue
@@ -183,7 +185,7 @@ class Scraper:
                     print(post["url"] + " has already been downloaded... skipping")
             print('End list'.center(40, '='), '\n')
 
-    def grab_image(self, download_folder):
+    def grab_image(self, download_folder, bar):
         while True:
             try:
                 submission = self.que.get(block=False)
@@ -245,13 +247,13 @@ class Scraper:
                         image.write(chunk)
                 self.succeeded += 1
                 self.downloaded_images.append(file_path)
+                bar.step()
             except Exception as exc:
                 self.handle_error(exc, submission)
 
-    def update_screen(self):
+    def update_screen(self, bar):
         while self.notify:
-            handled_images = self.succeeded + self.failed
-            print("Downloading images {}/{}".format(handled_images,len(self.posts)),
+            print("{}".format(bar.get_progress_bar()),
                   flush=True, end='\r')
             time.sleep(0.5)
 
@@ -260,8 +262,7 @@ class Scraper:
          in self.posts, assumes all links are image links"""
         # Stop if there's not posts to download
         if len(self.posts) < 1:
-            print("No new images to download.")
-            return
+            sys.exit("No new images to download.")
 
         # Make folders
         os.makedirs("Downloads", exist_ok=True)
@@ -271,16 +272,23 @@ class Scraper:
         for post in self.posts:
             self.que.put(post)
 
+        # Create progress bar
+        bar = CLIBar(_max=len(self.posts))
+
         threads = []
         print("Starting {} threads".format(self.args.threads))
         for n in range(self.args.threads):
             thread = threading.Thread(target=self.grab_image,
-                                      args=(download_folder, ))
+                                      args=(download_folder, bar))
             thread.start()
             threads.append(thread)
 
+        print("Downloading images")
+        bar.start()
+
         self.notify = True
-        threading.Thread(target=self.update_screen).start()
+        threading.Thread(target=self.update_screen,
+                         args=(bar, )).start()
         for thread in threads:
             try:
                 thread.join()
@@ -364,7 +372,6 @@ class Scraper:
                     except UnicodeEncodeError:
                         pass
                 log.write('End deleted list'.center(50, '=') + '\n'*2)
-
 
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
