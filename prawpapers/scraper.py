@@ -89,7 +89,7 @@ class Scraper:
             else:
                 author = str(submission.author)
 
-            if url.endswith(".jpg"):
+            if url.endswith(".jpg") or url.endswith(".png"):
                 context = {"url": url,
                            "title": submission.title,
                            "author": author,
