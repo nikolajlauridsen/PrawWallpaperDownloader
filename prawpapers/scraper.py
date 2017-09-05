@@ -58,6 +58,9 @@ class Scraper:
         parser.add_argument("-s", "--subreddit",
                             help="specify subreddit to scrape",
                             default=self.config['Sub'])
+        parser.add_argument("-se", "--section",
+                            help="specify section of subreddit to scrape (hot, top, rising or new)",
+                            default="hot")
         parser.add_argument("-l", "--limit",
                             help="set amount of posts to sift through "
                                  "(default " + self.config['Limit'] + ")",
@@ -84,48 +87,73 @@ class Scraper:
         args = parser.parse_args()
         return args
 
-    def get_posts(self, subreddit):
+    def get_submissions(self, subreddit):
+        section = self.args.section.lower().strip()
+        limit = self.args.limit
+        if section == "top":
+            return subreddit.top(limit=limit)
+        elif section == "new":
+            return subreddit.new(limit=limit)
+        elif section == "rising":
+            return subreddit.rising(limit=limit)
+        else:
+            if section != "hot":
+                print("Unknown section, defaulting to hot")
+            return subreddit.hot(limit=limit)
+        pass
+
+    def extract_submission_data(self, submission):
+        url = submission.url
+        # Check for author
+        if not submission.author:
+            author = '[User Deleted]'
+        else:
+            author = str(submission.author)
+
+        # Direct jpg and png links
+        if url.endswith(".jpg") or url.endswith(".png"):
+            context = {"url": url,
+                       "title": submission.title,
+                       "author": author,
+                       "parent_id": None}
+            self.posts.append(context)
+
+        # Imgur support
+        elif ("imgur.com" in url) and ("/a/" not in url):
+            if url.endswith("/new"):
+                url = url.rsplit("/", 1)[0]
+            id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
+            link = "http://i.imgur.com/" + id + ".jpg"
+            context = {"url": link,
+                       "title": submission.title,
+                       "author": author,
+                       "parent_id": None}
+            self.posts.append(context)
+
+        # Album support
+        elif ("imgur.com" in url) and ("/a/" in url):
+            album_context = {"url": url,
+                             "title": submission.title,
+                             "author": author}
+            return album_context
+
+    def handle_submissions(self, subreddit):
         """Get and sort posts from reddit"""
-        albums = []  # Array to hold all the album elements for later.
         print('Contacting reddit, please hold...')
-        for submission in subreddit.hot(limit=self.args.limit):
-            url = submission.url
-            # Check for author
-            if not submission.author:
-                author = '[User Deleted]'
-            else:
-                author = str(submission.author)
 
-            if url.endswith(".jpg") or url.endswith(".png"):
-                context = {"url": url,
-                           "title": submission.title,
-                           "author": author,
-                           "parent_id": None}
-                self.posts.append(context)
-
-            # Imgur support
-            elif ("imgur.com" in url) and ("/a/" not in url):
-                if url.endswith("/new"):
-                    url = url.rsplit("/", 1)[0]
-                id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-                link = "http://i.imgur.com/" + id + ".jpg"
-                context = {"url": link,
-                           "title": submission.title,
-                           "author": author,
-                           "parent_id": None}
-                self.posts.append(context)
-            # Album support
-            elif ("imgur.com" in url) and ("/a/" in url):
-                album_context = {"url"  : url,
-                                 "title": submission.title,
-                                 "author": author}
-                albums.append(album_context)
+        albums = []  # Array to hold all the album elements for later.
+        for submission in self.get_submissions(subreddit):
+            album = self.extract_submission_data(submission)
+            if album:
+                albums.append(album)
 
         # Extract all image links from the imgur albums
         if not self.args.noalbum:
             self.handle_albums(albums)
-        # Save amount of valid imagages
+
+        # Save amount of valid images
         self.n_posts = len(self.posts)
+
         # Sort out previously downloaded images
         if not self.args.nosort:
             if self.config["MaxAge"].lower().strip() == "none":
@@ -228,7 +256,7 @@ class Scraper:
                     content_type = "jpg"
 
             # content-headers describe .jpg images with jpeg
-            if  content_type == 'jpeg':
+            if content_type == 'jpeg':
                 image_format = '.jpg'
             else:
                 image_format = '.' + content_type
@@ -411,8 +439,8 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
-            print('Getting posts from: ' + self.args.subreddit)
-            self.get_posts(self.r.subreddit(self.args.subreddit))
+            print('Getting posts the {} section of: {}'.format(self.args.section, self.args.subreddit))
+            self.handle_submissions(self.r.subreddit(self.args.subreddit))
         except Exception as e:
             sys.exit("An error occurred:\n{}: {}".format(type(e), str(e)))
 
