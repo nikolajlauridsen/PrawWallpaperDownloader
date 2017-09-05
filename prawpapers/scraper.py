@@ -13,6 +13,7 @@ import bs4
 import re
 import praw
 import argparse
+import json
 from PIL import Image
 
 configurator = Configurator()
@@ -24,7 +25,8 @@ class Scraper:
 
     def __init__(self):
         self.db = DbHandler()
-        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus")
+        _id = self.get_id()
+        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
 
         self.succeeded = 0
         self.failed = 0
@@ -44,6 +46,11 @@ class Scraper:
 
         self.config = configurator.get_config()
         self.args = self.parse_arguments()
+
+    @staticmethod
+    def get_id():
+        with open('client_secret.json', 'r') as id_file:
+            return json.loads("".join(id_file.readlines()))
 
     def parse_arguments(self):
         """Parse arguments from commandline"""
@@ -81,7 +88,7 @@ class Scraper:
         """Get and sort posts from reddit"""
         albums = []  # Array to hold all the album elements for later.
         print('Contacting reddit, please hold...')
-        for submission in subreddit.get_hot(limit=self.args.limit):
+        for submission in subreddit.hot(limit=self.args.limit):
             url = submission.url
             # Check for author
             if not submission.author:
@@ -407,13 +414,9 @@ class Scraper:
         """Run the scraper"""
         try:
             print('Getting posts from: ' + self.args.subreddit)
-            self.get_posts(self.r.get_subreddit(self.args.subreddit))
-        except praw.errors.InvalidSubreddit:
-            sys.exit("It appears like you mis typed the subreddit name")
-        except praw.errors.Forbidden:
-            sys.exit("Access to subreddit denied")
-        except praw.errors.NotFound:
-            sys.exit("Subreddit not found")
+            self.get_posts(self.r.subreddit(self.args.subreddit))
+        except Exception as e:
+            sys.exit("An error occurred:\n{}: {}".format(type(e), str(e)))
 
         self.download_images()
         self.save_posts()
