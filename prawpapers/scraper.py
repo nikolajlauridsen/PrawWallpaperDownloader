@@ -149,7 +149,6 @@ class Scraper:
                 self.handle_error(exc, album)
                 continue
 
-
             # Parse through the html fetching all link elements
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
@@ -161,14 +160,14 @@ class Scraper:
             if len(link_elements) > 0:
                 for a_id, ele in enumerate(link_elements):
                     # Put the data in context for later
-                    context = {"url"  : "http:" + ele.get('href'),
+                    context = {"url": "http:" + ele.get('href'),
                                "title": album["title"],
                                "parent_id": album_id,
-                               "id"   : a_id,
+                               "id": a_id,
                                "author": album["author"]}
                     self.posts.append(context)
             self.albums += 1
-        print() #Add missing newline from printing album nr
+        print()  # Add missing newline from printing album nr
 
     def handle_error(self, err, post):
         """Handles error stats and prints a message if verbose is enabled"""
@@ -177,9 +176,9 @@ class Scraper:
         self.failed_list.append(post)
         if self.args.verbose:
             # \033[F should return cursor to last line
-            # But this is not guranteed for all consoles
+            # But this is not guaranteed for all consoles
             # Maybe look into curse library
-            print('\nAn album error occured: ' + str(err), end='\033[F')
+            print('\nAn album error occurred: ' + str(err), end='\033[F')
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -304,7 +303,6 @@ class Scraper:
                 pass
         self.notify = False
 
-
     def print_stats(self):
         """Print download stats to console"""
         print()
@@ -318,7 +316,7 @@ class Scraper:
                                       self.skipped,
                                       self.failed,
                                       len(self.deleted_images),
-   				                      new_images))
+                                      new_images))
 
     def save_posts(self):
         """Save posts currently in self.posts to database"""
@@ -344,8 +342,8 @@ class Scraper:
                 for post in self.failed_list:
                     try:
                         log.write("{}\n{}\n"
-                                 "\n".format(post["title"],
-                                             post["url"]))
+                                  "\n".format(post["title"],
+                                              post["url"]))
                     except UnicodeEncodeError:
                         pass
                 log.write("End failed list".center(40, '=') + '\n'*2)
@@ -364,7 +362,7 @@ class Scraper:
                 for post in self.skipped_list:
                     try:
                         log.write("{}\n{}\n"
-                                 "\n".format(post["title"],
+                                  "\n".format(post["title"],
                                              post["url"]))
                     except UnicodeEncodeError:
                         pass

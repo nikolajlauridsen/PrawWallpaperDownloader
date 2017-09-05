@@ -1,5 +1,5 @@
 """
-Class that handles database interaction
+Class which handles database interaction
 """
 import sqlite3 as lite
 import time
@@ -26,7 +26,7 @@ class DbHandler:
         """
         try:
             self.c.execute("INSERT INTO downloads VALUES (?, ?, ?, ?, ?, ?)",
-                          (None,
+                           (None,
                            int(time.time()),
                            submission["url"],
                            submission["title"],
