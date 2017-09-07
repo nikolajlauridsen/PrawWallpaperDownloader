@@ -3,6 +3,7 @@ from configurator import Configurator
 
 scraper = Scraper()
 
+
 def main():
     if scraper.args.redownload:
         scraper.re_download()

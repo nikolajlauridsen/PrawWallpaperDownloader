@@ -13,6 +13,7 @@ import bs4
 import re
 import praw
 import argparse
+import json
 from PIL import Image
 
 configurator = Configurator()
@@ -24,7 +25,8 @@ class Scraper:
 
     def __init__(self):
         self.db = DbHandler()
-        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus")
+        _id = self.get_id()
+        self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
 
         self.succeeded = 0
         self.failed = 0
@@ -45,12 +47,20 @@ class Scraper:
         self.config = configurator.get_config()
         self.args = self.parse_arguments()
 
+    @staticmethod
+    def get_id():
+        with open('client_secret.json', 'r') as id_file:
+            return json.loads("".join(id_file.readlines()))
+
     def parse_arguments(self):
         """Parse arguments from commandline"""
         parser = argparse.ArgumentParser()
         parser.add_argument("-s", "--subreddit",
                             help="specify subreddit to scrape",
                             default=self.config['Sub'])
+        parser.add_argument("-se", "--section",
+                            help="specify section of subreddit to scrape (hot, top, rising or new)",
+                            default="hot")
         parser.add_argument("-l", "--limit",
                             help="set amount of posts to sift through "
                                  "(default " + self.config['Limit'] + ")",
@@ -77,48 +87,73 @@ class Scraper:
         args = parser.parse_args()
         return args
 
-    def get_posts(self, subreddit):
+    def get_submissions(self, subreddit):
+        section = self.args.section.lower().strip()
+        limit = self.args.limit
+        if section == "top":
+            return subreddit.top(limit=limit)
+        elif section == "new":
+            return subreddit.new(limit=limit)
+        elif section == "rising":
+            return subreddit.rising(limit=limit)
+        else:
+            if section != "hot":
+                print("Unknown section, defaulting to hot")
+            return subreddit.hot(limit=limit)
+        pass
+
+    def extract_submission_data(self, submission):
+        url = submission.url
+        # Check for author
+        if not submission.author:
+            author = '[User Deleted]'
+        else:
+            author = str(submission.author)
+
+        # Direct jpg and png links
+        if url.endswith(".jpg") or url.endswith(".png"):
+            context = {"url": url,
+                       "title": submission.title,
+                       "author": author,
+                       "parent_id": None}
+            self.posts.append(context)
+
+        # Imgur support
+        elif ("imgur.com" in url) and ("/a/" not in url):
+            if url.endswith("/new"):
+                url = url.rsplit("/", 1)[0]
+            id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
+            link = "http://i.imgur.com/" + id + ".jpg"
+            context = {"url": link,
+                       "title": submission.title,
+                       "author": author,
+                       "parent_id": None}
+            self.posts.append(context)
+
+        # Album support
+        elif ("imgur.com" in url) and ("/a/" in url):
+            album_context = {"url": url,
+                             "title": submission.title,
+                             "author": author}
+            return album_context
+
+    def handle_submissions(self, subreddit):
         """Get and sort posts from reddit"""
-        albums = []  # Array to hold all the album elements for later.
         print('Contacting reddit, please hold...')
-        for submission in subreddit.get_hot(limit=self.args.limit):
-            url = submission.url
-            # Check for author
-            if not submission.author:
-                author = '[User Deleted]'
-            else:
-                author = str(submission.author)
 
-            if url.endswith(".jpg") or url.endswith(".png"):
-                context = {"url": url,
-                           "title": submission.title,
-                           "author": author,
-                           "parent_id": None}
-                self.posts.append(context)
-
-            # Imgur support
-            elif ("imgur.com" in url) and ("/a/" not in url):
-                if url.endswith("/new"):
-                    url = url.rsplit("/", 1)[0]
-                id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-                link = "http://i.imgur.com/" + id + ".jpg"
-                context = {"url": link,
-                           "title": submission.title,
-                           "author": author,
-                           "parent_id": None}
-                self.posts.append(context)
-            # Album support
-            elif ("imgur.com" in url) and ("/a/" in url):
-                album_context = {"url"  : url,
-                                 "title": submission.title,
-                                 "author": author}
-                albums.append(album_context)
+        albums = []  # Array to hold all the album elements for later.
+        for submission in self.get_submissions(subreddit):
+            album = self.extract_submission_data(submission)
+            if album:
+                albums.append(album)
 
         # Extract all image links from the imgur albums
         if not self.args.noalbum:
             self.handle_albums(albums)
-        # Save amount of valid imagages
+
+        # Save amount of valid images
         self.n_posts = len(self.posts)
+
         # Sort out previously downloaded images
         if not self.args.nosort:
             if self.config["MaxAge"].lower().strip() == "none":
@@ -142,7 +177,6 @@ class Scraper:
                 self.handle_error(exc, album)
                 continue
 
-
             # Parse through the html fetching all link elements
             soup = bs4.BeautifulSoup(res.text, 'html.parser')
             link_elements = soup.select('a.zoom')
@@ -154,14 +188,14 @@ class Scraper:
             if len(link_elements) > 0:
                 for a_id, ele in enumerate(link_elements):
                     # Put the data in context for later
-                    context = {"url"  : "http:" + ele.get('href'),
+                    context = {"url": "http:" + ele.get('href'),
                                "title": album["title"],
                                "parent_id": album_id,
-                               "id"   : a_id,
+                               "id": a_id,
                                "author": album["author"]}
                     self.posts.append(context)
             self.albums += 1
-        print() #Add missing newline from printing album nr
+        print()  # Add missing newline from printing album nr
 
     def handle_error(self, err, post):
         """Handles error stats and prints a message if verbose is enabled"""
@@ -170,9 +204,9 @@ class Scraper:
         self.failed_list.append(post)
         if self.args.verbose:
             # \033[F should return cursor to last line
-            # But this is not guranteed for all consoles
+            # But this is not guaranteed for all consoles
             # Maybe look into curse library
-            print('\nAn album error occured: ' + str(err), end='\033[F')
+            print('\nAn album error occurred: ' + str(err), end='\033[F')
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -222,7 +256,7 @@ class Scraper:
                     content_type = "jpg"
 
             # content-headers describe .jpg images with jpeg
-            if  content_type == 'jpeg':
+            if content_type == 'jpeg':
                 image_format = '.jpg'
             else:
                 image_format = '.' + content_type
@@ -297,7 +331,6 @@ class Scraper:
                 pass
         self.notify = False
 
-
     def print_stats(self):
         """Print download stats to console"""
         print()
@@ -311,7 +344,7 @@ class Scraper:
                                       self.skipped,
                                       self.failed,
                                       len(self.deleted_images),
-   				                      new_images))
+                                      new_images))
 
     def save_posts(self):
         """Save posts currently in self.posts to database"""
@@ -337,8 +370,8 @@ class Scraper:
                 for post in self.failed_list:
                     try:
                         log.write("{}\n{}\n"
-                                 "\n".format(post["title"],
-                                             post["url"]))
+                                  "\n".format(post["title"],
+                                              post["url"]))
                     except UnicodeEncodeError:
                         pass
                 log.write("End failed list".center(40, '=') + '\n'*2)
@@ -357,7 +390,7 @@ class Scraper:
                 for post in self.skipped_list:
                     try:
                         log.write("{}\n{}\n"
-                                 "\n".format(post["title"],
+                                  "\n".format(post["title"],
                                              post["url"]))
                     except UnicodeEncodeError:
                         pass
@@ -406,14 +439,10 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
-            print('Getting posts from: ' + self.args.subreddit)
-            self.get_posts(self.r.get_subreddit(self.args.subreddit))
-        except praw.errors.InvalidSubreddit:
-            sys.exit("It appears like you mis typed the subreddit name")
-        except praw.errors.Forbidden:
-            sys.exit("Access to subreddit denied")
-        except praw.errors.NotFound:
-            sys.exit("Subreddit not found")
+            print('Getting posts the {} section of: {}'.format(self.args.section, self.args.subreddit))
+            self.handle_submissions(self.r.subreddit(self.args.subreddit))
+        except Exception as e:
+            sys.exit("An error occurred:\n{}: {}".format(type(e), str(e)))
 
         self.download_images()
         self.save_posts()

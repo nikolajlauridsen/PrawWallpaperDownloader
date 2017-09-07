@@ -2,8 +2,8 @@ import configparser
 import sys
 import os
 
-class Configurator:
 
+class Configurator:
     def __init__(self):
         self.config = configparser.ConfigParser()
 

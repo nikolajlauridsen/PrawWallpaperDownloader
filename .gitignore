@@ -13,3 +13,4 @@ test.py
 *.xlsx
 env/
 ProjectReport.*
+client_secret.json
