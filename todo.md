@@ -11,3 +11,4 @@
 7. Add section to config file
 8. Add gif support (imgur, gfycat, reddit mirror)
 9. Handle KeyboardInterrupt (Allow users to stop the script)
+10. Add section to README descriping process of registering the script.
