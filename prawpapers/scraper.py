@@ -452,8 +452,11 @@ class Scraper:
             sys.exit('\nError connecting to reddit, please check your '
                      'internet connection')
         except ResponseException:
-            sys.exit('\nInvalid client_secret.json file\n Please see README.md '
-                     'about how to set up the file properly')
+            sys.exit('\nError connecting to reddit.\n'
+                     'Probably because you wrote an invalid subreddit name.\n'
+                     'If that\'s not the case it\'s probably an'
+                     'invalid client_secret.json file\nPlease see README.md '
+                     'about how to set up the file properly.')
         except Exception as e:
             sys.exit('\nAn unknown error occurred:\n{}: {}'.format(type(e),
                                                                    str(e)))
