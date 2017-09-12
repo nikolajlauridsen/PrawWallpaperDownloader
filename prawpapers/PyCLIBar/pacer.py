@@ -19,7 +19,7 @@ class Pacer:
                       used for a continued process
                       (WARNING! Not yet implemented!)
         """
-        assert self.max > 1, "Max is less than zero (you cannot expect < 1 step)"
+        assert self.max >= 1, "Max is less than zero (you cannot expect < 1 step)"
 
         # If it's a resumed process you might want to start somewhere not at 0
         if start:
@@ -32,7 +32,7 @@ class Pacer:
         Set the amount of steps in the process to be timed
         :param _max: int amount of steps.
         """
-        assert _max > 1, "Max is less than zero (you cannot expect < 1 step)"
+        assert _max >= 1, "Max is less than zero (you cannot expect < 1 step)"
         self.max = _max
 
     def reset(self):
