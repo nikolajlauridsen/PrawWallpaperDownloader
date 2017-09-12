@@ -1,5 +1,6 @@
 from db_handler import DbHandler
 from configurator import Configurator
+from prawcore.exceptions import RequestException
 
 from PyCLIBar.CLIBar import CLIBar
 
@@ -311,7 +312,7 @@ class Scraper:
 
         threads = []
         print("Starting {} threads".format(self.args.threads))
-        for n in range(self.args.threads):
+        for n in range(min(len(self.posts), self.args.threads)):
             thread = threading.Thread(target=self.grab_image,
                                       args=(download_folder, bar))
             thread.start()
@@ -441,8 +442,10 @@ class Scraper:
         try:
             print('Getting posts the {} section of: {}'.format(self.args.section, self.args.subreddit))
             self.handle_submissions(self.r.subreddit(self.args.subreddit))
+        except RequestException:
+            sys.exit('Error connecting to reddit, please check your internet connection')
         except Exception as e:
-            sys.exit("An error occurred:\n{}: {}".format(type(e), str(e)))
+            sys.exit("An unknown error occurred:\n{}: {}".format(type(e), str(e)))
 
         self.download_images()
         self.save_posts()
