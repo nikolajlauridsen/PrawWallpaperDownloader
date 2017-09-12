@@ -1,6 +1,6 @@
 from db_handler import DbHandler
 from configurator import Configurator
-from prawcore.exceptions import RequestException
+from prawcore.exceptions import RequestException, ResponseException
 
 from PyCLIBar.CLIBar import CLIBar
 
@@ -50,8 +50,13 @@ class Scraper:
 
     @staticmethod
     def get_id():
-        with open('client_secret.json', 'r') as id_file:
-            return json.loads("".join(id_file.readlines()))
+        if os.path.isfile('client_secret.json'):
+            with open('client_secret.json', 'r') as id_file:
+                return json.loads("".join(id_file.readlines()))
+        else:
+            sys.exit('Unable to locate client_secret.json.\n'
+                     'Please have a look at README.md '
+                     'and follow the instructions')
 
     def parse_arguments(self):
         """Parse arguments from commandline"""
@@ -440,12 +445,18 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
-            print('Getting posts the {} section of: {}'.format(self.args.section, self.args.subreddit))
+            print('Getting posts the {} section of: {}'
+                  .format(self.args.section, self.args.subreddit))
             self.handle_submissions(self.r.subreddit(self.args.subreddit))
         except RequestException:
-            sys.exit('Error connecting to reddit, please check your internet connection')
+            sys.exit('\nError connecting to reddit, please check your '
+                     'internet connection')
+        except ResponseException:
+            sys.exit('\nInvalid client_secret.json file\n Please see README.md '
+                     'about how to set up the file properly')
         except Exception as e:
-            sys.exit("An unknown error occurred:\n{}: {}".format(type(e), str(e)))
+            sys.exit('\nAn unknown error occurred:\n{}: {}'.format(type(e),
+                                                                   str(e)))
 
         self.download_images()
         self.save_posts()
