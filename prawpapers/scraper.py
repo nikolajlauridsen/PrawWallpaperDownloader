@@ -41,8 +41,6 @@ class Scraper:
         self.posts = []
         self.que = queue.Queue()
         self.downloaded_images = []
-        self.failed_list = []
-        self.callbacks = []
         self.skipped_list = []
         self.deleted_images = []
 
@@ -247,6 +245,7 @@ class Scraper:
             try:
                 submission = self.que.get(block=False)
             except queue.Empty:
+                logging.info('Download thread done... Stopping')
                 return
 
             # Try to download image
@@ -314,15 +313,19 @@ class Scraper:
             print("{}".format(bar.get_progress_bar()),
                   flush=True, end='\r')
             time.sleep(0.5)
+        logging.info('Notify thread stopping')
 
     def download_images(self):
         """Create folders and try to download/save the image links
          in self.posts, assumes all links are image links"""
         # Stop if there's not posts to download
         if len(self.posts) < 1:
+            logging.info('No images to download, stopping')
             sys.exit("No new images to download.")
 
+        logging.info('Starting download')
         # Make folders
+        logging.info('Creating folders')
         os.makedirs("Downloads", exist_ok=True)
         download_folder = os.path.join("Downloads", self.args.subreddit)
         os.makedirs(download_folder, exist_ok=True)
@@ -336,6 +339,7 @@ class Scraper:
         threads = []
         print("Starting {} threads".format(self.args.threads))
         for n in range(min(len(self.posts), self.args.threads)):
+            logging.info('Starting thread: {}'.format(n))
             thread = threading.Thread(target=self.grab_image,
                                       args=(download_folder, bar))
             thread.start()
@@ -345,14 +349,18 @@ class Scraper:
         bar.start()
 
         self.notify = True
+        logging.info('Starting notify thread')
         threading.Thread(target=self.update_screen,
                          args=(bar, )).start()
+
+        logging.info('Waiting for download threads to finish')
         for thread in threads:
             try:
                 thread.join()
             except KeyboardInterrupt:
                 # Don't know how to handle this, ideas?
                 pass
+        logging.info('Done, telling notify thread to stop')
         self.notify = False
 
     def print_stats(self):
@@ -389,8 +397,11 @@ class Scraper:
                 image.close()
                 try:
                     os.remove(image_path)
+                    logging.info('Removing image due to size: {}'.format(image_path))
                     self.deleted_images.append(image_path)
-                except PermissionError:
+                except PermissionError as e:
+                    logging.warning('Error deleting image: {}: {}: {}'.format(
+                        image_path, type(e), str(e)))
                     print('\nCan\'t delete ' + image_path + ' image is currently in use')
             else:
                 image.close()
