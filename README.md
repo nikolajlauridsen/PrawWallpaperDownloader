@@ -33,11 +33,11 @@ py -m pip install -r requirements.txt
 
 ### Setting up your client_secret.json file
 The new version of praw requires you to identify the script before you can use it, this is fortunately quite easy, just follow the steps below.
-1. Go to [this page on reddit](https://www.reddit.com/prefs/apps/) (you might havr to log in)
+1. Go to [this page on reddit](https://www.reddit.com/prefs/apps/) (you might have to log in)
 2. Scroll down to the bottom and click the "Create another app" button
 3. Tick off 'script' and fill out the remaining boxes
 4. You'll now be able to see your app in the list
-5. Open your client_secret.json file in your favourite text editer
+5. Open your client_secret.json file in your favourite text editor
 6. Replace YOUR-CLIENT-ID with the weird line of characters under the "personal use script" label, keep the quotations (See screenshot)
 7. Repeat step 6 for the YOUR-CLIENT-SECRET field, this time using the characters next to the "secret" label (See screenshot)
 
