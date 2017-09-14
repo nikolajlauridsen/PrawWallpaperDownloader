@@ -96,7 +96,8 @@ class Scraper:
 
     def initialize_logger(self):
         if self.args.log:
-            logging.basicConfig(filename='papers.log', level=logging.INFO)
+            logging.basicConfig(filename='papers.log', level=logging.INFO,
+                                filemode='w')
             logging.info('Logger started')
             settings = "Arguments:\n"
             for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
