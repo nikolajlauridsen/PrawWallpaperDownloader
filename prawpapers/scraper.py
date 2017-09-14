@@ -97,7 +97,9 @@ class Scraper:
     def initialize_logger(self):
         if self.args.log:
             logging.basicConfig(filename='papers.log', level=logging.INFO,
-                                filemode='w')
+                                filemode='w',
+                                format='%(asctime)s %(message)s',
+                                datefmt='%d/%m/%y %H:%M:%S:')
             logging.info('Logger started')
             settings = "Arguments:\n"
             for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
