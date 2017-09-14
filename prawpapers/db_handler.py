@@ -118,14 +118,11 @@ class DbHandler:
         """
         new_links = []
         old_links = self.get_links(age_limit=age_limit)
-        skipped_list = []
 
         for submission in submissions:
             if submission["url"] not in old_links:
                 new_links.append(submission)
-            else:
-                skipped_list.append(submission)
-        return new_links, skipped_list
+        return new_links
 
     def sort_albums(self, albums):
         """

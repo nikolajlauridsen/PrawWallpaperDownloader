@@ -41,7 +41,6 @@ class Scraper:
         self.posts = []
         self.que = queue.Queue()
         self.downloaded_images = []
-        self.skipped_list = []
         self.deleted_images = []
 
         self.config = configurator.get_config()
@@ -180,10 +179,10 @@ class Scraper:
         # Sort out previously downloaded images
         if not self.args.nosort:
             if self.config["MaxAge"].lower().strip() == "none":
-                self.posts, self.skipped_list = self.db.sort_links(self.posts)
+                self.posts = self.db.sort_links(self.posts)
             else:
-                self.posts, self.skipped_list = self.db.sort_links(self.posts, age_limit=self.config["MaxAge"])
-            self.print_skipped()
+                self.posts = self.db.sort_links(self.posts, age_limit=self.config["MaxAge"])
+            self.skipped = self.n_posts - len(self.posts)
 
     def handle_albums(self, albums):
         """Extract all links from a list of imgur albums"""
@@ -231,17 +230,6 @@ class Scraper:
             # But this is not guaranteed for all consoles
             # Maybe look into curse library
             print('\nAn error occurred: ' + str(err), end='\033[F')
-
-    def print_skipped(self):
-        """Print posts in skipped_list to console"""
-        if self.args.verbose:
-            print('\n', 'Skipped posts'.center(40, '='))
-            for post in self.skipped_list:
-                try:
-                    print(post["title"] + " has already been downloaded... skipping")
-                except UnicodeEncodeError:
-                    print(post["url"] + " has already been downloaded... skipping")
-            print('End list'.center(40, '='), '\n')
 
     def grab_image(self, download_folder, bar):
         while True:
@@ -369,7 +357,6 @@ class Scraper:
     def print_stats(self):
         """Print download stats to console"""
         print()
-        self.skipped = len(self.skipped_list)
         new_images = self.succeeded-len(self.deleted_images)
         print('Albums: {}\nImages downloaded: {}/{} \nSkipped: {}\n'
               'Failed: {}\nDeleted: {}\n'
