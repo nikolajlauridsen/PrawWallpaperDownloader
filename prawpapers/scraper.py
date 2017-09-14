@@ -16,6 +16,7 @@ import praw
 import argparse
 import json
 from PIL import Image
+import logging
 
 configurator = Configurator()
 
@@ -47,6 +48,7 @@ class Scraper:
 
         self.config = configurator.get_config()
         self.args = self.parse_arguments()
+        self.initialize_logger()
 
     @staticmethod
     def get_id():
@@ -54,6 +56,7 @@ class Scraper:
             with open('client_secret.json', 'r') as id_file:
                 return json.loads("".join(id_file.readlines()))
         else:
+            logging.error('Client_secret.json not found, exiting')
             sys.exit('Unable to locate client_secret.json.\n'
                      'Please have a look at README.md '
                      'and follow the instructions')
@@ -93,6 +96,18 @@ class Scraper:
         args = parser.parse_args()
         return args
 
+    def initialize_logger(self):
+        if self.args.log:
+            logging.basicConfig(filename='papers.log', level=logging.INFO)
+            logging.info('Logger started')
+            settings = "Arguments:\n"
+            for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
+                settings += "{}: {}\n".format(key, val)
+            logging.info(settings)
+
+        else:
+            logging.basicConfig(level=logging.CRITICAL)
+
     def get_submissions(self, subreddit):
         section = self.args.section.lower().strip()
         limit = self.args.limit
@@ -104,6 +119,7 @@ class Scraper:
             return subreddit.rising(limit=limit)
         else:
             if section != "hot":
+                logging.warning("Unknown section, defaulting to hot")
                 print("Unknown section, defaulting to hot")
             return subreddit.hot(limit=limit)
         pass
@@ -205,14 +221,15 @@ class Scraper:
 
     def handle_error(self, err, post):
         """Handles error stats and prints a message if verbose is enabled"""
-        self.callbacks.append(err)
         self.failed += 1
-        self.failed_list.append(post)
+        logging.error('Error occurred at:{} {}: {}'.format(post["title"],
+                                                           type(err),
+                                                           str(err)))
         if self.args.verbose:
             # \033[F should return cursor to last line
             # But this is not guaranteed for all consoles
             # Maybe look into curse library
-            print('\nAn album error occurred: ' + str(err), end='\033[F')
+            print('\nAn error occurred: ' + str(err), end='\033[F')
 
     def print_skipped(self):
         """Print posts in skipped_list to console"""
@@ -233,6 +250,7 @@ class Scraper:
                 return
 
             # Try to download image
+            logging.info('Downloading image {}'.format(submission["title"]))
             try:
                 response = requests.get(submission["url"], timeout=10)
                 response.raise_for_status()
@@ -358,60 +376,6 @@ class Scraper:
             self.db.insert_link(post)
         self.db.save_changes()
 
-    def save_log(self):
-        """Build log file"""
-        with open("log.txt", 'w', encoding="utf-8") as log:
-            # Introduction
-            log.write("Log for " + time.strftime("%d-%m-%Y %H:%M") + "\n")
-            log.write("Albums: {}\nSucceeded: {}\nSkipped: {}\n"
-                      "Deleted: {}\nFailed: {}\n\n".format(self.albums,
-                                                           self.succeeded,
-                                                           self.skipped,
-                                                           len(self.deleted_images),
-                                                           self.failed))
-
-            # Failed list
-            if len(self.failed_list) > 0:
-                log.write("Begin failed list".center(40, '=') + '\n')
-                for post in self.failed_list:
-                    try:
-                        log.write("{}\n{}\n"
-                                  "\n".format(post["title"],
-                                              post["url"]))
-                    except UnicodeEncodeError:
-                        pass
-                log.write("End failed list".center(40, '=') + '\n'*2)
-
-            # Callbacks
-            if len(self.callbacks) > 0:
-                log.write("Begin callbacks".center(40, '=') + '\n')
-                for callback in self.callbacks:
-                    log.write(str(callback))
-                    log.write('\n'*2)
-                log.write('End callbacks'.center(40, '=') + '\n'*2)
-
-            # Skipped list
-            if len(self.skipped_list) > 0:
-                log.write("Begin skipped list".center(40, '=') + '\n')
-                for post in self.skipped_list:
-                    try:
-                        log.write("{}\n{}\n"
-                                  "\n".format(post["title"],
-                                             post["url"]))
-                    except UnicodeEncodeError:
-                        pass
-                log.write("End skipped list".center(40, '=') + '\n'*2)
-
-            # Deleted list
-            if len(self.deleted_images) > 0:
-                log.write('Begin deleted list'.center(40, '=') + '\n'*2)
-                for image in self.deleted_images:
-                    try:
-                        log.write("{} deleted due to size\n\n".format(image))
-                    except UnicodeEncodeError:
-                        pass
-                log.write('End deleted list'.center(50, '=') + '\n'*2)
-
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
         print('\nCleaning up')
@@ -439,8 +403,6 @@ class Scraper:
         if len(self.downloaded_images) > 0 and not self.args.noclean:
             self.clean_up()
         self.print_stats()
-        if self.args.log:
-            self.save_log()
 
     def run(self):
         """Run the scraper"""
@@ -466,5 +428,3 @@ class Scraper:
         if len(self.downloaded_images) > 0 and not self.args.noclean:
             self.clean_up()
         self.print_stats()
-        if self.args.log:
-            self.save_log()
