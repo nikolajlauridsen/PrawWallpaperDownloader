@@ -186,13 +186,13 @@ class Scraper:
 
     def handle_albums(self, albums):
         """Extract all links from a list of imgur albums"""
-        logger.info('Extracting albums...')
+        logging.info('Extracting albums...')
         albums = self.db.sort_albums(albums)
         n_albums = len(albums)
 
         for _id, album in enumerate(albums):
             print("\rHandling album: {}/{}".format(_id+1, n_albums), end='')
-            logger.info('Handling album {}/{}'.format(_id+1, n_albums))
+            logging.info('Handling album {}/{}'.format(_id+1, n_albums))
             # Download imgur album
             res = requests.get(album["url"])
             try:
