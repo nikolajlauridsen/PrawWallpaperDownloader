@@ -27,6 +27,10 @@ class Scraper:
 
     def __init__(self):
         self.db = DbHandler()
+        self.config = configurator.get_config()
+        self.args = self.parse_arguments()
+        self.initialize_logger()
+
         _id = self.get_id()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
 
@@ -42,10 +46,6 @@ class Scraper:
         self.posts = []
         self.que = queue.Queue()
         self.downloaded_images = []
-
-        self.config = configurator.get_config()
-        self.args = self.parse_arguments()
-        self.initialize_logger()
 
     @staticmethod
     def get_id():
