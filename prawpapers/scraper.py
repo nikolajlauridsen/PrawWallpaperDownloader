@@ -109,6 +109,11 @@ class Scraper:
             logging.basicConfig(level=logging.CRITICAL)
 
     def get_submissions(self, subreddit):
+        """
+        Get submissions from reddit
+        Takes a subreddit object from PRAW as argument
+        Returns list of PRAW submission objects
+        """
         section = self.args.section.lower().strip()
         limit = self.args.limit
         if section == "top":
@@ -122,9 +127,26 @@ class Scraper:
                 logging.warning("Unknown section, defaulting to hot")
                 print("Unknown section, defaulting to hot")
             return subreddit.hot(limit=limit)
-        pass
 
     def extract_submission_data(self, submission):
+        """
+        Exctract direct image links, and relevant data from a PRAW submission
+        object
+        Takes a PRAW submission object as arguments and appends a dictionary
+        in the following format to self.posts:
+
+        {"url": image-link,
+         "title": submission title,
+         "author": author of the submission (reddit user name),
+         "parent_id": None (only used for images in albums)}
+
+        If the submission link to an album this function will instead return
+        an album dictionary for further processing later in the process
+        album dictionary format:
+        {"url": link to imgur album,
+         "title": submission title,
+         "author": submission author (reddit username}
+        """
         url = submission.url
         # Check for author
         if not submission.author:
@@ -234,6 +256,13 @@ class Scraper:
             print('\nAn error occurred: ' + str(err), end='\033[F')
 
     def grab_image(self, download_folder, bar):
+        """
+        Worker function for downloading images, keeps pulling a new link
+        from image que, downloads it, and saves it, untill the que is empty.
+        Takes 2 arguments:
+        download_folder: Path to desired save folder
+        bar: PyCLIBar to be stepped after image has been downloaded
+        """
         while True:
             try:
                 submission = self.que.get(block=False)
@@ -302,11 +331,16 @@ class Scraper:
                 self.handle_error(exc, submission)
 
     def update_screen(self, bar):
+        """
+        Keeps refreshing the CLIbar every .5 seconds as llong as self.notify
+        is true, always run as a seperate thread
+        """
         while self.notify:
             print("{}".format(bar.get_progress_bar()),
                   flush=True, end='\r')
             time.sleep(0.5)
         logging.info('Notify thread stopping')
+        return
 
     def download_images(self):
         """Create folders and try to download/save the image links
