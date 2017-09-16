@@ -30,18 +30,18 @@ class Scraper:
         _id = self.get_id()
         self.r = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
 
+        self.n_posts = 0
+        self.albums = 0
         self.succeeded = 0
         self.failed = 0
         self.skipped = 0
-        self.n_posts = 0
-        self.albums = 0
+        self.deleted = 0
 
         self.notify = False
 
         self.posts = []
         self.que = queue.Queue()
         self.downloaded_images = []
-        self.deleted_images = []
 
         self.config = configurator.get_config()
         self.args = self.parse_arguments()
@@ -359,7 +359,7 @@ class Scraper:
     def print_stats(self):
         """Print download stats to console"""
         print()
-        new_images = self.succeeded-len(self.deleted_images)
+        new_images = self.succeeded-self.deleted
         print('Albums: {}\nImages downloaded: {}/{} \nSkipped: {}\n'
               'Failed: {}\nDeleted: {}\n'
               'New images: {}'.format(self.albums,
@@ -367,7 +367,7 @@ class Scraper:
                                       self.n_posts,
                                       self.skipped,
                                       self.failed,
-                                      len(self.deleted_images),
+                                      self.deleted,
                                       new_images))
 
     def save_posts(self):
@@ -390,7 +390,7 @@ class Scraper:
                 try:
                     os.remove(image_path)
                     logging.info('Removing image due to size: {}'.format(image_path))
-                    self.deleted_images.append(image_path)
+                    self.deleted += 1
                 except PermissionError as e:
                     logging.warning('Error deleting image: {}: {}: {}'.format(
                         image_path, type(e), str(e)))
