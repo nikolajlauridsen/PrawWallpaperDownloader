@@ -1,7 +1,7 @@
 import configparser
 import sys
 import os
-
+import qprompt
 
 class Configurator:
     def __init__(self):
@@ -45,59 +45,18 @@ class Configurator:
         else:
             sys.exit("Invalid input")
 
+    def create_menu(self):
+        menu = qprompt.Menu()
+        for i, item in enumerate(self.config['user']):
+            menu.add(str(i+1), item)
+        menu.add(0, "Exit")
+        return menu
+
     def menu(self):
         """Run the configurator menu allowing user to edit config"""
-        print('Choose setting to change')
-        print('\nConfig menu:')
-        print('1) Minimum width: {}\n2) Minimum height: {}\n'
-              '3) Post limit: {}\n4) Default subreddit: {}\n'
-              '5) Clean: {}\n6) Sort: {}\n7) Max Age: {}\n'
-              '8) Download albums: {}\n9) Threads: {}\n'
-              '10) Reset to default\n11) Exit'
-              .format(self.config['user']['MinWidth'],
-                      self.config['user']['MinHeight'],
-                      self.config['user']['Limit'],
-                      self.config['user']['Sub'],
-                      self.config['user']['Clean'],
-                      self.config['user']['Sort'],
-                      self.config['user']['MaxAge'],
-                      self.config['user']['Albums'],
-                      self.config['user']['Threads']))
-
-        u_input = input('Menu: ')
-        if u_input == '1':
-            self.config['user']['MinWidth'] = input('New minimum width: ')
-            self.save_config()
-        elif u_input == '2':
-            self.config['user']['MinHeight'] = input('New minimum height: ')
-            self.save_config()
-        elif u_input == '3':
-            self.config['user']['Limit'] = input('New post limit: ')
-            self.save_config()
-        elif u_input == '4':
-            self.config['user']['Sub'] = input('New default subreddit: ')
-            self.save_config()
-        elif u_input == '5':
-            self.config['user']['Clean'] = self.prompt_boolean("Clean")
-            self.save_config()
-        elif u_input == '6':
-            self.config['user']['Sort'] = self.prompt_boolean("Sort")
-            self.save_config()
-        elif u_input == '7':
-            self.config['user']['MaxAge'] = input('New max age: ')
-            self.save_config()
-        elif u_input == '8':
-            self.config['user']['Albums'] = self.prompt_boolean("Download albums")
-            self.save_config()
-        elif u_input == '9':
-            self.config['user']['Threads'] = input('New thread count: ')
-            self.save_config()
-        elif u_input == '10':
-            self.reset_config()
-        elif u_input == '11':
-            self.save_config()
-        else:
-            print('Invalid input')
+        menu = self.create_menu()
+        selection = menu.show(returns="desc")
+        print(selection)
 
     def save_config(self):
         with open('config.ini', 'w') as configfile:
