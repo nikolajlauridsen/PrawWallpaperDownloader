@@ -200,7 +200,7 @@ class Scraper:
 
         # Sort out previously downloaded images
         if not self.args.nosort:
-            if self.config["MaxAge"].lower().strip() == "none":
+            if int(self.config["MaxAge"]) == 0:
                 self.posts = self.db.sort_links(self.posts)
             else:
                 self.posts = self.db.sort_links(self.posts, age_limit=self.config["MaxAge"])
