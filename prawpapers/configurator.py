@@ -14,7 +14,7 @@ class Configurator:
 
         self.type_map = {"int": ["minwidth", "minheight", "limit", "threads",
                                  "maxage"],
-                         "string": ["sub"],
+                         "string": ["sub", "section"],
                          "bool": ["clean", "sort", "albums"]
                          }
 
@@ -28,7 +28,8 @@ class Configurator:
                                   'Sort'       : 'yes',
                                   'MaxAge'     : '0',
                                   'Albums'     : 'yes',
-                                  'Threads'    : '10'}
+                                  'Threads'    : '10',
+                                  'Section'    : 'hot'}
         self.config['user'] = {}
         self.save_config()
 

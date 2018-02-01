@@ -66,7 +66,7 @@ class Scraper:
                             default=self.config['Sub'])
         parser.add_argument("-se", "--section",
                             help="specify section of subreddit to scrape (hot, top, rising or new)",
-                            default="hot")
+                            default=self.config['section'])
         parser.add_argument("-l", "--limit",
                             help="set amount of posts to sift through "
                                  "(default " + self.config['Limit'] + ")",
