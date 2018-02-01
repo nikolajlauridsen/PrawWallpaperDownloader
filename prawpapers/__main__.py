@@ -15,5 +15,6 @@ def main():
         scraper.run()
     logging.info('Logger stopped')
 
+
 if __name__ == '__main__':
     main()
