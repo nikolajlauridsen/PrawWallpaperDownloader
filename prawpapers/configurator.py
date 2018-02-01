@@ -79,10 +79,3 @@ class Configurator:
         with open('config.ini', 'w') as configfile:
             self.config.write(configfile)
 
-    def reset_config(self):
-        for key in self.config['user']:
-            try:
-                self.config['user'].pop(key, None)
-            except KeyError:
-                pass
-        self.save_config()
