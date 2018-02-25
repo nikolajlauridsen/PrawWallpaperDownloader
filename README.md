@@ -11,7 +11,7 @@ Going into a little more detail the script will:
 3. Extract all image links from any imgur albums found and add them to the link pool
 4. Check whether any of the links has been downloaded before, sorting out those who has
 5. Download all the now sorted links
-6. Go through all downloaded images deleting any images less than 1280x720
+6. Go through all downloaded images deleting images smaller than the minimum size, and those with a different aspect ratio
 
 The configuration mode lets you tweak almost all settings to your desire, including but not limited to:
 * Default subreddit
@@ -20,6 +20,16 @@ The configuration mode lets you tweak almost all settings to your desire, includ
 * And more
 
 Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)
+
+#### Features
+* Sort by size
+* Sort by aspect ratio
+* Multi threaded download for fast downloading
+* Database functionality ensuring no redownloads and allows you to keep track of images downloaded
+* Scrape by section
+* Imgur album support (up to 10 images pr. album, will hopefully be improved)
+* Customize behaviour to your liking through an easy to use configurator
+* Logging functionality
 
 ## Install process
 1. Download and install python from https://www.python.org/ (If you're unsure download version 3.5 and chose default install)
@@ -73,3 +83,5 @@ py prawpapers -s MinimalWallpaper -l 100 --log
 * --na or --noalbum skip imgur albums
 * --log save a log of posts skipped
 * --verbose or -v print skipped posts to console
+* --section or -se \<section> Specify which section you want to scrape (hot, new, top, rising)
+* --ratiolock or -rlock \<lock strength> Lock downloaded images to a certain aspect ratio, the value of the lock will determine the allowed margin of error, 0 for no lock, 1 for fully locked (only exactly matching aspect ratios), I recommend a value between 0.9 and 1 for decent results.
