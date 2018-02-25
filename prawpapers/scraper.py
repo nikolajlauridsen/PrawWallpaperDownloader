@@ -90,7 +90,13 @@ class Scraper:
                             default=int(self.config['Threads']), type=int)
         parser.add_argument('-con', '--configure', help="Change settings",
                             action='store_true', default=False)
+        parser.add_argument('-rlock', '--ratiolock',
+                            help="Sort out images with incorrect aspect ratio, 0 for no lock, "
+                                 "1 for full lock (Ratio lock: {})".format(self.config['ratiolock']),
+                            default=float(self.config['ratiolock']), type=float)
         args = parser.parse_args()
+        if args.ratiolock < 0 or args.ratiolock > 1:
+            sys.exit("Incorrect ratio lock, please keep it between 0.0 and 1.0 (Currently {})".format(args.ratiolock))
         return args
 
     def initialize_logger(self):
@@ -413,11 +419,22 @@ class Scraper:
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
         print('\nCleaning up')
+        min_ratio = (int(self.config['MinWidth'])/int(self.config['MinHeight']))*self.args.ratiolock
+        max_ratio = (int(self.config['MinWidth'])/int(self.config['MinHeight']))*(2-self.args.ratiolock)
+        if float(self.args.ratiolock) <= 0:
+            max_ratio = 100000
+        logging.info("Ratio settings: RatioLock: {} | MinRatio: {} | MaxRatio: {}".format(self.args.ratiolock,
+                                                                                          min_ratio, max_ratio))
         for image_path in self.downloaded_images:
             try:
+                logging.info("Checking: {}".format(image_path))
                 image = Image.open(image_path)
+                image_ratio = image.size[0] / image.size[1]
+                logging.info("Image size: {}x{}".format(image.size[0], image.size[1]))
+                logging.info("Image ratio: {}".format(image_ratio))
             except OSError:
                 continue
+            # Check for size.
             if image.size[0] < int(self.config['MinWidth'])\
                     or image.size[1] < int(self.config['MinHeight']):
                 image.close()
@@ -429,7 +446,22 @@ class Scraper:
                     logging.warning('Error deleting image: {}: {}: {}'.format(
                         image_path, type(e), str(e)))
                     print('\nCan\'t delete ' + image_path + ' image is currently in use')
+                continue
             else:
+                logging.info("Image size ok, checking ratio")
+            # Check for ratio
+            if min_ratio > image_ratio or max_ratio > max_ratio:
+                logging.info('Removing image due to ratio: {}'.format(image_path))
+                image.close()
+                try:
+                    os.remove(image_path)
+                    self.deleted += 1
+                except PermissionError as e:
+                    logging.warning('Error deleting image: {}: {}: {}'.format(
+                        image_path, type(e), str(e)))
+                    print('\nCan\'t delete ' + image_path + ' image is currently in use')
+            else:
+                logging.info('Ratio ok.')
                 image.close()
 
     def re_download(self):

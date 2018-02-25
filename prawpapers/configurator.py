@@ -14,6 +14,7 @@ class Configurator:
 
         self.type_map = {"int": ["minwidth", "minheight", "limit", "threads",
                                  "maxage"],
+                         "float": ["ratiolock"],
                          "string": ["sub", "section"],
                          "bool": ["clean", "sort", "albums"]
                          }
@@ -29,7 +30,8 @@ class Configurator:
                                   'MaxAge'     : '0',
                                   'Albums'     : 'yes',
                                   'Threads'    : '10',
-                                  'Section'    : 'hot'}
+                                  'Section'    : 'hot',
+                                  'RatioLock'  : '0.95'}
         self.config['user'] = {}
         self.save_config()
 
@@ -68,6 +70,8 @@ class Configurator:
         desc_str = "Enter new {} (currently {})".format(value, self.config['user'][value])
         if value in self.type_map["int"]:
             self.config['user'][value] = str(qprompt.ask_int(desc_str))
+        elif value in self.type_map["float"]:
+            self.config['user'][value] = str(qprompt.ask_float(desc_str))
         elif value in self.type_map["string"]:
             self.config['user'][value] = qprompt.ask_str(desc_str)
         elif value in self.type_map["bool"]:
