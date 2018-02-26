@@ -76,7 +76,7 @@ class Configurator:
         elif value in self.type_map["string"]:
             self.config['user'][value] = qprompt.ask_str(desc_str)
         elif value in self.type_map["bool"]:
-            desc_str += " yes/no"
+            desc_str += " y/n"
             if qprompt.ask_yesno(desc_str):
                 self.config['user'][value] = "yes"
             else:
@@ -85,7 +85,6 @@ class Configurator:
         self.save_config()
         self.clear_screen()
         print('Config saved...')
-        self.menu()
 
     def menu(self):
         """Run the configurator menu allowing user to edit config"""
@@ -102,6 +101,7 @@ class Configurator:
             pass
         else:
             self.update_value(selection)
+            self.menu()
 
     def save_config(self):
         with open('config.ini', 'w') as configfile:
