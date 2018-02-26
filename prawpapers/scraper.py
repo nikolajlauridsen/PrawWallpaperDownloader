@@ -101,10 +101,14 @@ class Scraper:
 
     def initialize_logger(self):
         if self.args.log:
-            logging.basicConfig(filename='papers.log', level=logging.INFO,
-                                filemode='w',
+            # Windows default encoding for text files isn't UTF-8 (it's ANSI afaik)
+            # So we need to create a custom FileHandler which opens the text file in UTF-8
+            file_handler = logging.FileHandler(filename='papers.log', mode='w', encoding="utf8")
+            logging.basicConfig(level=logging.INFO,
                                 format='%(asctime)s %(message)s',
-                                datefmt='%d/%m/%y %H:%M:%S:')
+                                datefmt='%d/%m/%y %H:%M:%S:',
+                                handlers=[file_handler])
+
             logging.info('Logger started')
             settings = "Arguments:\n"
             for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
