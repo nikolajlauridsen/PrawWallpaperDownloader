@@ -100,23 +100,29 @@ class Scraper:
         return args
 
     def initialize_logger(self):
+        handlers = []
         if self.args.log:
             # Windows default encoding for text files isn't UTF-8 (it's ANSI afaik)
             # So we need to create a custom FileHandler which opens the text file in UTF-8
             file_handler = logging.FileHandler(filename='papers.log', mode='w', encoding="utf8")
-            logging.basicConfig(level=logging.INFO,
-                                format='%(asctime)s %(message)s',
-                                datefmt='%d/%m/%y %H:%M:%S:',
-                                handlers=[file_handler])
+            handlers.append(file_handler)
+        if self.args.verbose:
+            # Create stream handler pointing to stdout (terminal) and add it to handlers.
+            stream_handler = logging.StreamHandler(stream=sys.stdout)
+            handlers.append(stream_handler)
+        elif not self.args.log:
+            handlers.append(logging.StreamHandler(stream=open(os.devnull, 'w', encoding="utf-8")))
 
-            logging.info('Logger started')
-            settings = "Arguments:\n"
-            for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
-                settings += "{}: {}\n".format(key, val)
-            logging.info(settings)
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(message)s',
+                            datefmt='%d/%m/%y %H:%M:%S:',
+                            handlers=handlers)
 
-        else:
-            logging.basicConfig(level=logging.CRITICAL)
+        logging.info('Logger started')
+        settings = "Arguments:\n"
+        for key, val in zip(vars(self.args).keys(), vars(self.args).values()):
+            settings += "{}: {}\n".format(key, val)
+        logging.info(settings)
 
     def get_submissions(self, subreddit):
         """
@@ -259,11 +265,6 @@ class Scraper:
         logging.error('Error occurred at:{} {}: {}'.format(post["title"],
                                                            type(err),
                                                            str(err)))
-        if self.args.verbose:
-            # \033[F should return cursor to last line
-            # But this is not guaranteed for all consoles
-            # Maybe look into curse library
-            print('\nAn error occurred: ' + str(err), end='\033[F')
 
     def grab_image(self, download_folder, bar):
         """
