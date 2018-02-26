@@ -57,6 +57,7 @@ class Configurator:
         for i, item in enumerate(self.config['user']):
             menu.add(str(i+1), item)
         menu.add("0", "Exit")
+        menu.add("-1", "Reset config")
         return menu
 
     def update_value(self, value):
@@ -90,7 +91,16 @@ class Configurator:
         """Run the configurator menu allowing user to edit config"""
         menu = self.create_menu()
         selection = menu.show(returns="desc")
-        if selection != "Exit":
+        if selection == "Reset config":
+            answer = qprompt.ask_yesno("Are you sure you want to reset your config? y/n")
+            if answer:
+                self.create_default_config()
+                print("Config reset.")
+            else:
+                print('Reset canceled')
+        elif selection == "Exit":
+            pass
+        else:
             self.update_value(selection)
 
     def save_config(self):
