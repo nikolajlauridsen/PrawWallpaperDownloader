@@ -12,11 +12,11 @@ class Configurator:
         else:
             self.config.read('config.ini')
 
-        self.type_map = {"int": ["minwidth", "minheight", "limit", "threads",
-                                 "maxage"],
-                         "float": ["ratiolock"],
-                         "string": ["sub", "section"],
-                         "bool": ["clean", "sort", "albums"]
+        self.type_map = {int: ["minwidth", "minheight", "limit", "threads",
+                               "maxage"],
+                         float: ["ratiolock"],
+                         str: ["sub", "section"],
+                         bool: ["clean", "sort", "albums"]
                          }
 
     def create_default_config(self):
@@ -69,13 +69,13 @@ class Configurator:
         :param value: value name to be updated e.g. minwidth
         """
         desc_str = "Enter new {} (currently {})".format(value, self.config['user'][value])
-        if value in self.type_map["int"]:
+        if value in self.type_map[int]:
             self.config['user'][value] = str(qprompt.ask_int(desc_str))
-        elif value in self.type_map["float"]:
+        elif value in self.type_map[float]:
             self.config['user'][value] = str(qprompt.ask_float(desc_str))
-        elif value in self.type_map["string"]:
+        elif value in self.type_map[str]:
             self.config['user'][value] = qprompt.ask_str(desc_str)
-        elif value in self.type_map["bool"]:
+        elif value in self.type_map[bool]:
             desc_str += " y/n"
             if qprompt.ask_yesno(desc_str):
                 self.config['user'][value] = "yes"
