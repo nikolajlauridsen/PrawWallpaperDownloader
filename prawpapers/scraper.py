@@ -199,8 +199,6 @@ class Scraper:
 
     def handle_submissions(self, subreddit):
         """Get and sort posts from reddit"""
-        print('Contacting reddit, please hold...')
-
         albums = []  # Array to hold all the album elements for later.
         for submission in self.get_submissions(subreddit):
             album = self.extract_submission_data(submission)
@@ -481,8 +479,8 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
-            print('Getting posts the {} section of: {}'
-                  .format(self.args.section, self.args.subreddit))
+            print('Getting {} posts from the {} section of {}'
+                  .format(self.args.limit, self.args.section, self.args.subreddit))
             self.handle_submissions(self.r.subreddit(self.args.subreddit))
         except RequestException:
             sys.exit('\nError connecting to reddit, please check your '
