@@ -57,7 +57,8 @@ class Configurator:
         for i, item in enumerate(self.config['user']):
             menu.add(str(i+1), item)
         menu.add("0", "Exit")
-        menu.add("-1", "Reset config")
+        menu.add("-1", "List settings")
+        menu.add("-2", "Reset config")
         return menu
 
     def update_value(self, value):
@@ -86,10 +87,26 @@ class Configurator:
         self.clear_screen()
         print('Config saved...')
 
+    def list_settings(self):
+        # Find the length of the longest key name
+        pad = 0
+        for key in self.config['user'].keys():
+            if len(key) > pad:
+                pad = len(key)
+        pad += 1  # Add one to the padding, a little air is pretty
+        # Clear screen and print all the settings as a pretty list.
+        self.clear_screen()
+        print('Current settings: ')
+        for key in self.config['user']:
+            print('{:{align}}: {}'.format(key, self.config['user'][key], align=pad))
+        # Pause for the user to be able to read the settings.
+        input('\nPress enter to return to menu.')
+
     def menu(self):
         """Run the configurator menu allowing user to edit config"""
         menu = self.create_menu()
         selection = menu.show(returns="desc")
+
         if selection == "Reset config":
             answer = qprompt.ask_yesno("Are you sure you want to reset your config? y/n")
             if answer:
@@ -97,6 +114,10 @@ class Configurator:
                 print("Config reset.")
             else:
                 print('Reset canceled')
+        elif selection == "List settings":
+            self.list_settings()
+            self.clear_screen()
+            self.menu()
         elif selection == "Exit":
             pass
         else:
