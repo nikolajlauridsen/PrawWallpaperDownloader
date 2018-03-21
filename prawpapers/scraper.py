@@ -22,8 +22,11 @@ configurator = Configurator()
 
 
 class Scraper:
-    """A class for scraping links on reddit, utilizes DbHandler.py,
-    and configurator.py"""
+    """
+    The scraper, pretty much does all the hard work. 
+    When the Scraper is initialized it wil parse commandline arguments.
+    utilizes DbHandler.py,´and configurator.py
+    """
 
     def __init__(self):
         self.db = DbHandler()
@@ -197,10 +200,10 @@ class Scraper:
                              "author": author}
             return album_context
 
-    def handle_submissions(self, subreddit):
+    def handle_submissions(self, submissions):
         """Get and sort posts from reddit"""
         albums = []  # Array to hold all the album elements for later.
-        for submission in self.get_submissions(subreddit):
+        for submission in submissions:
             album = self.extract_submission_data(submission)
             if album:
                 albums.append(album)
@@ -481,7 +484,11 @@ class Scraper:
         try:
             print('Getting {} posts from the {} section of {}'
                   .format(self.args.limit, self.args.section, self.args.subreddit))
-            self.handle_submissions(self.r.subreddit(self.args.subreddit))
+            # Get submissions from sub
+            submissions = self.get_submissions(self.r.subreddit(self.args.subreddit))
+            # Handle the submissions and add them to self.posts
+            # Sorts out previously downloaded images and extracts imgur albums
+            self.handle_submissions(submissions)
         except RequestException:
             sys.exit('\nError connecting to reddit, please check your '
                      'internet connection')
@@ -494,7 +501,7 @@ class Scraper:
         except Exception as e:
             sys.exit('\nAn unknown error occurred:\n{}: {}'.format(type(e),
                                                                    str(e)))
-
+        # Download all images in self.posts.
         self.download_images()
         self.save_posts()
         if len(self.downloaded_images) > 0 and not self.args.noclean:
