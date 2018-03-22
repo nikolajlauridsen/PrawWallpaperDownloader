@@ -97,6 +97,8 @@ class Scraper:
                             help="Sort out images with incorrect aspect ratio, 0 for no lock, "
                                  "1 for full lock (Ratio lock: {})".format(self.config['ratiolock']),
                             default=float(self.config['ratiolock']), type=float)
+        parser.add_argument('-q', '--search', help="Scrape by search term", default=False,
+                            type=str)
         args = parser.parse_args()
         if args.ratiolock < 0 or args.ratiolock > 1:
             sys.exit("Incorrect ratio lock, please keep it between 0.0 and 1.0 (Currently {})".format(args.ratiolock))
@@ -135,7 +137,9 @@ class Scraper:
         """
         section = self.args.section.lower().strip()
         limit = self.args.limit
-        if section == "top":
+        if self.args.search:
+            return subreddit.search(self.args.search)
+        elif section == "top":
             return subreddit.top(limit=limit)
         elif section == "new":
             return subreddit.new(limit=limit)
@@ -482,8 +486,11 @@ class Scraper:
     def run(self):
         """Run the scraper"""
         try:
-            print('Getting {} posts from the {} section of {}'
-                  .format(self.args.limit, self.args.section, self.args.subreddit))
+            if not self.args.search:
+                print('Getting {} posts from the {} section of {}'
+                      .format(self.args.limit, self.args.section, self.args.subreddit))
+            else:
+                print('Searching {} for {}'.format(self.args.subreddit, self.args.search))
             # Get submissions from sub
             submissions = self.get_submissions(self.r.subreddit(self.args.subreddit))
             # Handle the submissions and add them to self.posts

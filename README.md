@@ -2,7 +2,7 @@
 
 Download a bunch of wallpapers from the hot sections of r/wallpapers
 
-And it doesn't even have to be wallpapers! PrawPapers will download images from any subreddit
+It doesn't even have to be wallpapers! PrawPapers will download images from any subreddit
 
 Going into a little more detail the script will:
 
@@ -27,6 +27,7 @@ Inspirations is drawn from [Daily-Reddit-Wallpaper](https://github.com/ssimunic/
 * Multi threaded download for fast downloading
 * Database functionality ensuring no redownloads and allows you to keep track of images downloaded
 * Scrape by section
+* Scrape by subreddit search
 * Imgur album support (up to 10 images pr. album, will hopefully be improved)
 * Customize behaviour to your liking through an easy to use configurator
 * Logging functionality
@@ -85,3 +86,4 @@ py prawpapers -s MinimalWallpaper -l 100 --log
 * --verbose or -v print skipped posts to console
 * --section or -se \<section> Specify which section you want to scrape (hot, new, top, rising)
 * --ratiolock or -rlock \<lock strength> Lock downloaded images to a certain aspect ratio, the value of the lock will determine the allowed margin of error, 0 for no lock, 1 for fully locked (only exactly matching aspect ratios), I recommend a value between 0.9 and 1 for decent results.
+* --search or -q \<query> scrape all search results of chosen subreddit
