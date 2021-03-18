@@ -4,7 +4,7 @@ certifi==2018.8.24
 chardet==3.0.4
 idna==2.7
 iterfzf==0.4.0.17.3
-Pillow==7.1.1
+Pillow==8.1.1
 praw==6.4.0
 prawcore==1.0.1
 qprompt==0.15.3
