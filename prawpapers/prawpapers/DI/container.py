@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 from ..Configuration.configurator import Configurator
-from ..Configuration.ArgumentParser import ArgumentParser
+from ..Configuration.argument_parser import ArgumentParser
 from ..scraper import Scraper
 
 

@@ -2,7 +2,7 @@ from prawpapers.scraper import Scraper
 from prawpapers.Configuration.configurator import Configurator
 from dependency_injector.wiring import Provide, inject
 import logging
-from prawpapers.DI.Container import Container
+from prawpapers.DI.container import Container
 
 
 @inject

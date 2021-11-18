@@ -1,6 +1,6 @@
 from .db_handler import DbHandler
 from .Configuration.configurator import Configurator
-from .Configuration.ArgumentParser import ArgumentParser
+from .Configuration.argument_parser import ArgumentParser
 from .PyCLIBar.CLIBar import CLIBar
 from prawcore.exceptions import RequestException, ResponseException
 
