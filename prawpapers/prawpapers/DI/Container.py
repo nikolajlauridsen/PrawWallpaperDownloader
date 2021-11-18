@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
-from configurator import Configurator
-from scraper import Scraper
+from ..Configuration.configurator import Configurator
+from ..scraper import Scraper
 
 
 class Container(containers.DeclarativeContainer):

@@ -1,8 +1,8 @@
-from scraper import Scraper
-from configurator import Configurator
+from prawpapers.scraper import Scraper
+from prawpapers.Configuration.configurator import Configurator
 from dependency_injector.wiring import Provide, inject
 import logging
-from DI.Container import Container
+from prawpapers.DI.Container import Container
 
 
 @inject

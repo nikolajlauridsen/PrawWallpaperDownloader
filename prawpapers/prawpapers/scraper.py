@@ -1,8 +1,7 @@
-from db_handler import DbHandler
-from configurator import Configurator
+from .db_handler import DbHandler
+from .Configuration.configurator import Configurator
+from .PyCLIBar.CLIBar import CLIBar
 from prawcore.exceptions import RequestException, ResponseException
-
-from PyCLIBar.CLIBar import CLIBar
 
 import time
 import os
