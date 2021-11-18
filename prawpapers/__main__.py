@@ -1,15 +1,17 @@
 from scraper import Scraper
 from configurator import Configurator
+from dependency_injector.wiring import Provide, inject
 import logging
+from DI.Container import Container
 
-scraper = Scraper()
 
-
-def main():
+@inject
+def main(
+        scraper: Scraper = Provide[Container.scraper],
+        config: Configurator = Provide[Container.config]) -> None:
     if scraper.args.redownload:
         scraper.re_download()
     elif scraper.args.configure:
-        config = Configurator()
         config.menu()
     else:
         scraper.run()
@@ -17,4 +19,6 @@ def main():
 
 
 if __name__ == '__main__':
+    container = Container()
+    container.wire(modules=[__name__])
     main()

@@ -18,8 +18,6 @@ import json
 from PIL import Image
 import logging
 
-configurator = Configurator()
-
 
 class Scraper:
     """
@@ -28,7 +26,9 @@ class Scraper:
     utilizes DbHandler.py,´and configurator.py
     """
 
-    def __init__(self):
+    def __init__(
+            self,
+            configurator: Configurator) -> None:
         self.database = DbHandler()
         self.config = configurator.get_config()
         self.args = self.parse_arguments()

@@ -2,6 +2,7 @@ beautifulsoup4==4.6.3
 bs4==0.0.1
 certifi==2018.8.24
 chardet==3.0.4
+dependency-injector==4.37.0
 idna==2.7
 iterfzf==0.4.0.17.3
 Pillow==7.1.1
