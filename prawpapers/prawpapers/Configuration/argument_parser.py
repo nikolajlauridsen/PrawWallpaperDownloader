@@ -9,6 +9,7 @@ class ArgumentParser():
 
     def parse_arguments(self):
         """Parse arguments from commandline"""
+        # TODO: Cache this
         parser = argparse.ArgumentParser()
 
         parser.add_argument("-s", "--subreddit",
