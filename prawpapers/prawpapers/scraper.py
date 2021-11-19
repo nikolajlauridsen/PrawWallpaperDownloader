@@ -31,12 +31,12 @@ class Scraper:
             argument_parser: ArgumentParser,
             database: DbHandler) -> None:
 
-        self.database = database
-        self.config = configurator.get_config()
-        self.args = argument_parser.parse_arguments()
+        self.__database = database
+        self.__config = configurator.get_config()
+        self.__args = argument_parser.get_arguments()
 
         _id = self.get_id()
-        self.reddit = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
+        self.__reddit = praw.Reddit(user_agent="PrawWallpaperDownloader 1.0.0 by /u/Pusillus", client_id=_id["id"], client_secret=_id["secret"])
 
         self.post_count = 0
         self.albums = 0
@@ -48,7 +48,7 @@ class Scraper:
         self.notify = False
 
         self.posts = []
-        self.queue = queue.Queue()
+        self.__queue = queue.Queue()
         self.downloaded_images = []
 
     @staticmethod
@@ -68,10 +68,10 @@ class Scraper:
         Takes a subreddit object from PRAW as argument
         Returns list of PRAW submission objects
         """
-        section = self.args.section.lower().strip()
-        limit = self.args.limit
-        if self.args.search:
-            return subreddit.search(self.args.search)
+        section = self.__args.section.lower().strip()
+        limit = self.__args.limit
+        if self.__args.search:
+            return subreddit.search(self.__args.search)
         elif section == "top":
             return subreddit.top(limit=limit)
         elif section == "new":
@@ -146,24 +146,24 @@ class Scraper:
                 albums.append(album)
 
         # Extract all image links from the imgur albums
-        if not self.args.noalbum:
+        if not self.__args.noalbum:
             self.handle_albums(albums)
 
         # Save amount of valid images
         self.post_count = len(self.posts)
 
         # Sort out previously downloaded images
-        if not self.args.nosort:
-            if int(self.config["MaxAge"]) == 0:
-                self.posts = self.database.sort_links(self.posts)
+        if not self.__args.nosort:
+            if int(self.__config["MaxAge"]) == 0:
+                self.posts = self.__database.sort_links(self.posts)
             else:
-                self.posts = self.database.sort_links(self.posts, age_limit=self.config["MaxAge"])
+                self.posts = self.__database.sort_links(self.posts, age_limit=self.__config["MaxAge"])
             self.skipped = self.post_count - len(self.posts)
 
     def handle_albums(self, albums):
         """Extract all links from a list of imgur albums"""
         logging.info('Extracting albums...')
-        albums = self.database.sort_albums(albums)
+        albums = self.__database.sort_albums(albums)
         n_albums = len(albums)
 
         for _id, album in enumerate(albums):
@@ -183,7 +183,7 @@ class Scraper:
 
             # Insert link to get id
             album['length'] = len(link_elements)
-            album_id = self.database.insert_album(album)
+            album_id = self.__database.insert_album(album)
 
             if len(link_elements) > 0:
                 for a_id, ele in enumerate(link_elements):
@@ -214,7 +214,7 @@ class Scraper:
         """
         while True:
             try:
-                submission = self.queue.get(block=False)
+                submission = self.__queue.get(block=False)
             except queue.Empty:
                 logging.info('Download thread done... Stopping')
                 return
@@ -303,18 +303,18 @@ class Scraper:
         # Make folders
         logging.info('Creating folders')
         os.makedirs("Downloads", exist_ok=True)
-        download_folder = os.path.join("Downloads", self.args.subreddit)
+        download_folder = os.path.join("Downloads", self.__args.subreddit)
         os.makedirs(download_folder, exist_ok=True)
 
         for post in self.posts:
-            self.queue.put(post)
+            self.__queue.put(post)
 
         # Create progress bar
         bar = CLIBar(_max=len(self.posts))
 
         threads = []
-        print("Starting {} threads".format(self.args.threads))
-        for n in range(min(len(self.posts), self.args.threads)):
+        print("Starting {} threads".format(self.__args.threads))
+        for n in range(min(len(self.posts), self.__args.threads)):
             logging.info('Starting thread: {}'.format(n))
             thread = threading.Thread(target=self.grab_image,
                                       args=(download_folder, bar))
@@ -356,17 +356,17 @@ class Scraper:
     def save_posts(self):
         """Save posts currently in self.posts to database"""
         for post in self.posts:
-            self.database.insert_link(post)
-        self.database.save_changes()
+            self.__database.insert_link(post)
+        self.__database.save_changes()
 
     def clean_up(self):
         """Examines all downloaded images, deleting duds"""
         print('\nCleaning up')
-        min_ratio = (int(self.config['MinWidth'])/int(self.config['MinHeight']))*self.args.ratiolock
-        max_ratio = (int(self.config['MinWidth'])/int(self.config['MinHeight']))*(2-self.args.ratiolock)
-        if float(self.args.ratiolock) <= 0:
+        min_ratio = (int(self.__config['MinWidth']) / int(self.__config['MinHeight'])) * self.__args.ratiolock
+        max_ratio = (int(self.__config['MinWidth']) / int(self.__config['MinHeight'])) * (2 - self.__args.ratiolock)
+        if float(self.__args.ratiolock) <= 0:
             max_ratio = 100000
-        logging.info("Ratio settings: RatioLock: {} | MinRatio: {} | MaxRatio: {}".format(self.args.ratiolock,
+        logging.info("Ratio settings: RatioLock: {} | MinRatio: {} | MaxRatio: {}".format(self.__args.ratiolock,
                                                                                           min_ratio, max_ratio))
         for image_path in self.downloaded_images:
             try:
@@ -378,8 +378,8 @@ class Scraper:
             except OSError:
                 continue
             # Check for size.
-            if image.size[0] < int(self.config['MinWidth'])\
-                    or image.size[1] < int(self.config['MinHeight']):
+            if image.size[0] < int(self.__config['MinWidth'])\
+                    or image.size[1] < int(self.__config['MinHeight']):
                 image.close()
                 try:
                     os.remove(image_path)
@@ -409,23 +409,23 @@ class Scraper:
 
     def re_download(self):
         """Attempts to re-download all links in the database"""
-        self.posts = self.database.get_posts()
+        self.posts = self.__database.get_posts()
         self.post_count = len(self.posts)
         self.download_images()
-        if len(self.downloaded_images) > 0 and not self.args.noclean:
+        if len(self.downloaded_images) > 0 and not self.__args.noclean:
             self.clean_up()
         self.print_stats()
 
     def run(self):
         """Run the scraper"""
         try:
-            if not self.args.search:
+            if not self.__args.search:
                 print('Getting {} posts from the {} section of {}'
-                      .format(self.args.limit, self.args.section, self.args.subreddit))
+                      .format(self.__args.limit, self.__args.section, self.__args.subreddit))
             else:
-                print('Searching {} for {}'.format(self.args.subreddit, self.args.search))
+                print('Searching {} for {}'.format(self.__args.subreddit, self.__args.search))
             # Get submissions from sub
-            submissions = self.get_submissions(self.reddit.subreddit(self.args.subreddit))
+            submissions = self.get_submissions(self.__reddit.subreddit(self.__args.subreddit))
             # Handle the submissions and add them to self.posts
             # Sorts out previously downloaded images and extracts imgur albums
             self.handle_submissions(submissions)
@@ -444,6 +444,6 @@ class Scraper:
         # Download all images in self.posts.
         self.download_images()
         self.save_posts()
-        if len(self.downloaded_images) > 0 and not self.args.noclean:
+        if len(self.downloaded_images) > 0 and not self.__args.noclean:
             self.clean_up()
         self.print_stats()

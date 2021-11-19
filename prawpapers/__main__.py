@@ -1,6 +1,7 @@
 from prawpapers.scraper import Scraper
 from prawpapers.Configuration.configurator import Configurator
 from prawpapers.Configuration.logging_settings import LoggingSettings
+from prawpapers.Configuration.argument_parser import ArgumentParser
 from dependency_injector.wiring import Provide, inject
 import logging
 from prawpapers.DI.container import Container
@@ -10,12 +11,15 @@ from prawpapers.DI.container import Container
 def main(
         scraper: Scraper = Provide[Container.scraper],
         config: Configurator = Provide[Container.config],
-        logging_settings: LoggingSettings = Provide[Container.logging_settings]) -> None:
+        logging_settings: LoggingSettings = Provide[Container.logging_settings],
+        argument_parser: ArgumentParser = Provide[Container.argument_parser]) -> None:
 
+    arguments = argument_parser.get_arguments()
     logging_settings.configure_logger()
-    if scraper.args.redownload:
+
+    if arguments.redownload:
         scraper.re_download()
-    elif scraper.args.configure:
+    elif arguments.configure:
         config.menu()
     else:
         scraper.run()
