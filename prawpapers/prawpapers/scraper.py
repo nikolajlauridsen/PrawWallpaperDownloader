@@ -1,4 +1,4 @@
-from .db_handler import DbHandler
+from .Persistance.db_handler import DbHandler
 from .Configuration.configurator import Configurator
 from .Configuration.argument_parser import ArgumentParser
 from .PyCLIBar.CLIBar import CLIBar
@@ -28,8 +28,10 @@ class Scraper:
     def __init__(
             self,
             configurator: Configurator,
-            argument_parser: ArgumentParser) -> None:
-        self.database = DbHandler()
+            argument_parser: ArgumentParser,
+            database: DbHandler) -> None:
+
+        self.database = database
         self.config = configurator.get_config()
         self.args = argument_parser.parse_arguments()
         self.initialize_logger()
