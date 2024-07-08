@@ -11,5 +11,5 @@ qprompt==0.16.1
 requests==2.31.0
 six==1.16.0
 update-checker==0.18.0
-urllib3==1.26.6
+urllib3==1.26.18
 websocket-client==1.2.1
